@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rick.cryptcloud.dao.CipherFKMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.CipherFK">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="k_0" jdbcType="VARCHAR" property="k0" />
+    <result column="k_t" jdbcType="VARCHAR" property="kT" />
+    <result column="rpk" jdbcType="VARCHAR" property="rpk" />
+    <result column="t" jdbcType="INTEGER" property="t" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cipher_fk
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.CipherFK">
+    insert into cipher_fk (id, k_0, k_t, rpk, 
+      t)
+    values (#{id,jdbcType=INTEGER}, #{k0,jdbcType=VARCHAR}, #{kT,jdbcType=VARCHAR}, #{rpk,jdbcType=VARCHAR}, 
+      #{t,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.CipherFK">
+    update cipher_fk
+    set k_0 = #{k0,jdbcType=VARCHAR},
+      k_t = #{kT,jdbcType=VARCHAR},
+      rpk = #{rpk,jdbcType=VARCHAR},
+      t = #{t,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, k_0, k_t, rpk, t
+    from cipher_fk
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, k_0, k_t, rpk, t
+    from cipher_fk
+  </select>
+</mapper>

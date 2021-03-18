@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.rick.cryptcloud.dao.UserMapper">
-  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.User">
+<mapper namespace="com.rick.cryptcloud.dao.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.Role">
     <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="rolename" jdbcType="VARCHAR" property="rolename" />
     <result column="public_key" jdbcType="VARCHAR" property="publicKey" />
     <result column="private_key" jdbcType="VARCHAR" property="privateKey" />
     <result column="sign_public" jdbcType="VARCHAR" property="signPublic" />
     <result column="sign_private" jdbcType="VARCHAR" property="signPrivate" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from user
+    delete from role
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.rick.cryptcloud.DO.User">
-    insert into user (id, username, public_key, 
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.Role">
+    insert into role (id, rolename, public_key, 
       private_key, sign_public, sign_private
       )
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{publicKey,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{rolename,jdbcType=VARCHAR}, #{publicKey,jdbcType=VARCHAR}, 
       #{privateKey,jdbcType=VARCHAR}, #{signPublic,jdbcType=VARCHAR}, #{signPrivate,jdbcType=VARCHAR}
       )
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.User">
-    update user
-    set username = #{username,jdbcType=VARCHAR},
+  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.Role">
+    update role
+    set rolename = #{rolename,jdbcType=VARCHAR},
       public_key = #{publicKey,jdbcType=VARCHAR},
       private_key = #{privateKey,jdbcType=VARCHAR},
       sign_public = #{signPublic,jdbcType=VARCHAR},
@@ -31,12 +31,12 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select id, username, public_key, private_key, sign_public, sign_private
-    from user
+    select id, rolename, public_key, private_key, sign_public, sign_private
+    from role
     where id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
-    select id, username, public_key, private_key, sign_public, sign_private
-    from user
+    select id, rolename, public_key, private_key, sign_public, sign_private
+    from role
   </select>
 </mapper>

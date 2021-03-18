@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rick.cryptcloud.dao.FKMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.FK">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="rolename" jdbcType="VARCHAR" property="rolename" />
+    <result column="version_role" jdbcType="INTEGER" property="versionRole" />
+    <result column="version_file" jdbcType="INTEGER" property="versionFile" />
+    <result column="operation" jdbcType="VARCHAR" property="operation" />
+    <result column="tag" jdbcType="VARCHAR" property="tag" />
+    <result column="cipher_fk" jdbcType="VARCHAR" property="cipherFk" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from fk
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.FK">
+    insert into fk (id, rolename, version_role, 
+      version_file, operation, tag, 
+      cipher_fk)
+    values (#{id,jdbcType=INTEGER}, #{rolename,jdbcType=VARCHAR}, #{versionRole,jdbcType=INTEGER}, 
+      #{versionFile,jdbcType=INTEGER}, #{operation,jdbcType=VARCHAR}, #{tag,jdbcType=VARCHAR}, 
+      #{cipherFk,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.FK">
+    update fk
+    set rolename = #{rolename,jdbcType=VARCHAR},
+      version_role = #{versionRole,jdbcType=INTEGER},
+      version_file = #{versionFile,jdbcType=INTEGER},
+      operation = #{operation,jdbcType=VARCHAR},
+      tag = #{tag,jdbcType=VARCHAR},
+      cipher_fk = #{cipherFk,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, rolename, version_role, version_file, operation, tag, cipher_fk
+    from fk
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, rolename, version_role, version_file, operation, tag, cipher_fk
+    from fk
+  </select>
+</mapper>
