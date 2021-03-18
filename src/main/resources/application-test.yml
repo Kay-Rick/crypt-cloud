@@ -9,7 +9,7 @@ logging:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.3.100:3306/ssm?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://192.168.3.100:3306/crypt_cloud?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&zeroDateTimeBehavior=convertToNull
     username: root
     password: 257098
 
@@ -87,6 +87,17 @@ spring:
       max-file-size: 1024MB
       max-request-size: 10240MB
 
+  mail:
+    host: smtp.gmail.com
+    username: xxxxx@gmail.com
+    password: xxxxxx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
 mybatis:
   # config-location: classpath:mybatis/mybatis-config.xml
@@ -100,3 +111,9 @@ file:
   baseLocation: D:\\Server\\Crypt-Cloud\\
   downloadLocation: D:\\Server\\Crypt-Cloud\\download\\
   uploadLocation: D:\\Server\\Crypt-Cloud\\upload\\
+
+
+aliyun:
+  endpoint: https://oss-cn-beijing.aliyuncs.com
+  accessKeyId: xxxxx
+  accessKeySecret: xxxxxx
