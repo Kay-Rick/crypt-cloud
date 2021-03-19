@@ -1,8 +1,10 @@
 package com.rick.cryptcloud;
 
+import com.rick.cryptcloud.DO.CipherFK;
 import com.rick.cryptcloud.common.*;
-import com.rick.cryptcloud.domain.User;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,16 +16,21 @@ public class UtilsTest {
 
     private final String baseLocation = "D:\\Server\\Crypt-Cloud\\";
 
+
     @Test
     public void test1() {
-        User user = new User();
-        user.setAge(20);
-        user.setId(1005);
-        user.setName("Rick");
-        SerializationUtils<User> serializationUtils = new SerializationUtils<>(baseLocation + "user.txt");
-        serializationUtils.saveObjToFile(user);
-        User recover =  serializationUtils.getObjToFile();
-        System.out.println(recover);
+        CipherFK cipherFK = new CipherFK();
+        cipherFK.setK0("123");
+        cipherFK.setkT("456");
+        cipherFK.setT(1);
+        cipherFK.setRpk("148");
+        String obj = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
+        System.out.println(obj);
+        CipherFK recover = SerializationUtils.deserialize(Base64.decodeBase64(obj));
+        System.out.println(recover.getK0());
+        System.out.println(recover.getkT());
+        System.out.println(recover.getT());
+        System.out.println(recover.getRpk());
     }
 
     @Test
@@ -49,8 +56,10 @@ public class UtilsTest {
 
     @Test
     public void test4() {
-        String key1 = "123";
-        String key2 = "456";
+        String key1 = AESUtils.generateAESKey();
+        String key2 = AESUtils.generateAESKey();
+        System.out.println(key1);
+        System.out.println(key2);
         String text = "Hello Rick";
         String cipher1 = AESUtils.encryptAES(text, key1);
         System.out.println(cipher1);
@@ -102,7 +111,7 @@ public class UtilsTest {
     public void test8() {
         String text = "Hello Rick";
         Map<String, Object> key = DSAUtils.initKey();
-        Map<String, String> signatureData = DSAUtils.SignatureData(text, DSAUtils.getPrivateKey(key));
+        Map<String, String> signatureData = DSAUtils.signatureData(text, DSAUtils.getPrivateKey(key));
         if (DSAUtils.checkSignature(signatureData, DSAUtils.getPublicKey(key))) {
             System.out.println("check signature success");
         } else {

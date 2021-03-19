@@ -1,14 +1,25 @@
 package com.rick.cryptcloud.common;
 
+import java.util.Random;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
 public class AESUtils {
 
+    private static final Random random = new Random();
+
     private static final String ALGORITHM = "AES";
 
     private static final String ALGORITHM_MODE = "AES/ECB/PKCS5Padding";
+
+    private static final int N = 1000;
+
+    public static String generateAESKey() {
+        int key = random.nextInt(N);
+        return String.valueOf(key);
+    }
 
     /**
      * 加密
