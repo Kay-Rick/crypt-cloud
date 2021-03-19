@@ -7,7 +7,7 @@ public class UserRole {
 
     private String rolename;
 
-    private String version;
+    private Integer version;
 
     public Integer getId() {
         return id;
@@ -33,11 +33,11 @@ public class UserRole {
         this.rolename = rolename;
     }
 
-    public String getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 }

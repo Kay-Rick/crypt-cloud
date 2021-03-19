@@ -1,6 +1,6 @@
 package com.rick.cryptcloud.DO;
 
-public class File {
+public class Document {
     private Integer id;
 
     private String filename;

@@ -5,23 +5,23 @@
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="rolename" jdbcType="VARCHAR" property="rolename" />
-    <result column="version" jdbcType="VARCHAR" property="version" />
+    <result column="version" jdbcType="INTEGER" property="version" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from user_role
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.UserRole">
-    insert into user_role (id, username, rolename, 
+    insert into user_role (username, rolename, 
       version)
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{rolename,jdbcType=VARCHAR}, 
-      #{version,jdbcType=VARCHAR})
+    values (#{username,jdbcType=VARCHAR}, #{rolename,jdbcType=VARCHAR}, 
+      #{version,jdbcType=INTEGER})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.UserRole">
     update user_role
     set username = #{username,jdbcType=VARCHAR},
       rolename = #{rolename,jdbcType=VARCHAR},
-      version = #{version,jdbcType=VARCHAR}
+      version = #{version,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">

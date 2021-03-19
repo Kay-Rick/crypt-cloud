@@ -14,10 +14,10 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.RoleFile">
-    insert into role_file (id, rolename, filename, 
+    insert into role_file (rolename, filename, 
       operation, version_file, version_role
       )
-    values (#{id,jdbcType=INTEGER}, #{rolename,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, 
+    values (#{rolename,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, 
       #{operation,jdbcType=VARCHAR}, #{versionFile,jdbcType=INTEGER}, #{versionRole,jdbcType=INTEGER}
       )
   </insert>

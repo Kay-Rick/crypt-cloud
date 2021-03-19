@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.rick.cryptcloud.dao.FileMapper">
-  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.File">
+<mapper namespace="com.rick.cryptcloud.dao.DocumentMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.Document">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="filename" jdbcType="VARCHAR" property="filename" />
     <result column="content" jdbcType="VARCHAR" property="content" />
@@ -11,13 +11,13 @@
     delete from file
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.rick.cryptcloud.DO.File">
-    insert into file (id, filename, content, 
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.Document">
+    insert into file (filename, content, 
       cipher_key)
-    values (#{id,jdbcType=INTEGER}, #{filename,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+    values (#{filename,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
       #{cipherKey,jdbcType=VARCHAR})
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.File">
+  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.Document">
     update file
     set filename = #{filename,jdbcType=VARCHAR},
       content = #{content,jdbcType=VARCHAR},

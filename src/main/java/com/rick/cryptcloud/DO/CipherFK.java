@@ -1,6 +1,8 @@
 package com.rick.cryptcloud.DO;
 
-public class CipherFK {
+import java.io.Serializable;
+
+public class CipherFK implements Serializable{
     private Integer id;
 
     private String k0;

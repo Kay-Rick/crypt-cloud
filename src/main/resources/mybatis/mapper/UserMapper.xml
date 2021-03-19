@@ -21,14 +21,13 @@
       #{privateKey,jdbcType=VARCHAR}, #{signPublic,jdbcType=VARCHAR}, #{signPrivate,jdbcType=VARCHAR}
       )
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.User">
+  <update id="updateByUserName" parameterType="com.rick.cryptcloud.DO.User">
     update user
-    set username = #{username,jdbcType=VARCHAR},
-      public_key = #{publicKey,jdbcType=VARCHAR},
+    set public_key = #{publicKey,jdbcType=VARCHAR},
       private_key = #{privateKey,jdbcType=VARCHAR},
       sign_public = #{signPublic,jdbcType=VARCHAR},
       sign_private = #{signPrivate,jdbcType=VARCHAR}
-    where id = #{id,jdbcType=INTEGER}
+    where username = #{username,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select id, username, public_key, private_key, sign_public, sign_private
