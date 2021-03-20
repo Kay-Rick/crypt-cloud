@@ -5,7 +5,7 @@ import com.rick.cryptcloud.common.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class UtilsTest {
 
-    private final String baseLocation = "D:\\Server\\Crypt-Cloud\\";
+    private final String baseLocation = "/Users/rick/Desktop/Server/Crypt-Cloud/";
 
 
     @Test
@@ -37,7 +37,7 @@ public class UtilsTest {
     public void test2() {
         String content = "Hello Rick";
         try {
-            FileUtils.writeStringToFile(new File(baseLocation + "download.txt"), content);
+            FileUtils.writeStringToFile(new File(baseLocation + "download/download.txt"), content);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -47,7 +47,7 @@ public class UtilsTest {
     public void test3() {
         String downloadFileContent = "";
         try {
-            downloadFileContent = FileUtils.readFileToString(new File(baseLocation + "download.txt"), Charset.defaultCharset());
+            downloadFileContent = FileUtils.readFileToString(new File(baseLocation + "download/download.txt"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }

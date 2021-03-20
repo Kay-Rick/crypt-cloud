@@ -17,6 +17,10 @@ public class ElgamalUtils {
 
     private static final int KEY_SIZE = 256;
 
+    private static final int ENCRYPT_BLOCK_SIZE = 32;
+
+    private static final int DECRYPT_BLOCK_SIZE = 88;
+
     private static final String PUBLIC_KEY = "ElGamalPublicKey";
 
     private static final String PRIVATE_KEY = "ElGamalPrivateKey";
@@ -56,17 +60,41 @@ public class ElgamalUtils {
      * @return
      */
     public static String encryptByPublicKey(String data, String key) {
+        Cipher cipher = null;
+        String cipherText = "";
         try {
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(Base64.decodeBase64(key));
             PublicKey pubKey = keyFactory.generatePublic(x509KeySpec);
-            Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+            cipher = Cipher.getInstance(keyFactory.getAlgorithm());
             cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-            return Base64.encodeBase64String(cipher.doFinal(data.getBytes()));
         }catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        if (data.length() <= ENCRYPT_BLOCK_SIZE) {
+            try {
+                return Base64.encodeBase64String(cipher.doFinal(data.getBytes()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        int blockNum = data.length() / ENCRYPT_BLOCK_SIZE + 1;
+        String[] plainText = new String[blockNum];
+        for (int i = 0; i < blockNum; i++) {
+            if (i * ENCRYPT_BLOCK_SIZE + ENCRYPT_BLOCK_SIZE > data.length()) {
+                plainText[i] = data.substring(i * ENCRYPT_BLOCK_SIZE);
+            }
+            else {
+                plainText[i] = data.substring(i * ENCRYPT_BLOCK_SIZE, (i + 1) * ENCRYPT_BLOCK_SIZE);
+            }
+            try {
+                cipherText += Base64.encodeBase64String(cipher.doFinal(plainText[i].getBytes()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return cipherText;
     }
 
 
@@ -77,17 +105,41 @@ public class ElgamalUtils {
      * @return
      */
     public static String decryptByPrivateKey(String data, String key) {
+        Cipher cipher = null;
+        String plainText = "";
         try {
             PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.decodeBase64(key));
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PrivateKey privateKey = keyFactory.generatePrivate(pkcs8KeySpec);
-            Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+            cipher = Cipher.getInstance(keyFactory.getAlgorithm());
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            return new String(cipher.doFinal(Base64.decodeBase64(data)));
         }catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        if (data.length() <= DECRYPT_BLOCK_SIZE) {
+            try {
+                return new String(cipher.doFinal(Base64.decodeBase64(data)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        int blockNum = data.length() / DECRYPT_BLOCK_SIZE;
+        String[] cipherText = new String[blockNum];
+        for (int i = 0; i < blockNum; i++) {
+            if (i * DECRYPT_BLOCK_SIZE + DECRYPT_BLOCK_SIZE > data.length()) {
+                cipherText[i] = data.substring(i * DECRYPT_BLOCK_SIZE);
+            }
+            else {
+                cipherText[i] = data.substring(i * DECRYPT_BLOCK_SIZE, (i + 1) * DECRYPT_BLOCK_SIZE);
+            }
+            try {
+                plainText += new String(cipher.doFinal(Base64.decodeBase64(cipherText[i])));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return plainText;
     }
 
 
