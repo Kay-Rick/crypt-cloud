@@ -142,4 +142,16 @@ public class UtilsTest {
             System.out.println(item);
         }
     }
+
+    @Test
+    public void test10() {
+        Map<String, Object> keyMap1 =  ElgamalUtils.initKey();
+        Map<String, Object> keyMap2 = ElgamalUtils.initKey();
+        System.out.println(ElgamalUtils.getPrivateKey(keyMap1));
+        System.out.println();
+        String info = ElgamalUtils.encryptByPublicKey(ElgamalUtils.getPrivateKey(keyMap1), ElgamalUtils.getPublicKey(keyMap2));
+        System.out.println();
+        System.out.println(info);
+        System.out.println(ElgamalUtils.decryptByPrivateKey(info, ElgamalUtils.getPrivateKey(keyMap2)));
+    }
 }
