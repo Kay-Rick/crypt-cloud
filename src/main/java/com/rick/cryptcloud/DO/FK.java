@@ -1,9 +1,13 @@
 package com.rick.cryptcloud.DO;
 
-public class FK {
+import java.io.Serializable;
+
+public class FK implements Serializable{
     private Integer id;
 
     private String rolename;
+
+    private String filename;
 
     private Integer versionRole;
 
@@ -11,9 +15,11 @@ public class FK {
 
     private String operation;
 
-    private String tag;
+    private Integer tag;
 
     private String cipherFk;
+
+    private String signature;
 
     public Integer getId() {
         return id;
@@ -29,6 +35,14 @@ public class FK {
 
     public void setRolename(String rolename) {
         this.rolename = rolename;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public Integer getVersionRole() {
@@ -55,11 +69,11 @@ public class FK {
         this.operation = operation;
     }
 
-    public String getTag() {
+    public Integer getTag() {
         return tag;
     }
 
-    public void setTag(String tag) {
+    public void setTag(Integer tag) {
         this.tag = tag;
     }
 
@@ -69,5 +83,13 @@ public class FK {
 
     public void setCipherFk(String cipherFk) {
         this.cipherFk = cipherFk;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 }

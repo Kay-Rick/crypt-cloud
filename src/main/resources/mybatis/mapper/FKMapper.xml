@@ -4,41 +4,49 @@
   <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.FK">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="rolename" jdbcType="VARCHAR" property="rolename" />
+    <result column="filename" jdbcType="VARCHAR" property="filename" />
     <result column="version_role" jdbcType="INTEGER" property="versionRole" />
     <result column="version_file" jdbcType="INTEGER" property="versionFile" />
     <result column="operation" jdbcType="VARCHAR" property="operation" />
-    <result column="tag" jdbcType="VARCHAR" property="tag" />
-    <result column="cipher_fk" jdbcType="VARCHAR" property="cipherFk" />
+    <result column="tag" jdbcType="INTEGER" property="tag" />
+    <result column="cipher_fk" jdbcType="LONGVARCHAR" property="cipherFk" />
+    <result column="signature" jdbcType="LONGVARCHAR" property="signature" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from fk
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.FK">
-    insert into fk (id, rolename, version_role, 
-      version_file, operation, tag, 
-      cipher_fk)
-    values (#{id,jdbcType=INTEGER}, #{rolename,jdbcType=VARCHAR}, #{versionRole,jdbcType=INTEGER}, 
-      #{versionFile,jdbcType=INTEGER}, #{operation,jdbcType=VARCHAR}, #{tag,jdbcType=VARCHAR}, 
-      #{cipherFk,jdbcType=VARCHAR})
+    insert into fk (rolename, filename, 
+      version_role, version_file, operation, 
+      tag, cipher_fk, signature
+      )
+    values (#{rolename,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, 
+      #{versionRole,jdbcType=INTEGER}, #{versionFile,jdbcType=INTEGER}, #{operation,jdbcType=VARCHAR}, 
+      #{tag,jdbcType=INTEGER}, #{cipherFk,jdbcType=LONGVARCHAR}, #{signature,jdbcType=LONGVARCHAR}
+      )
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.FK">
     update fk
     set rolename = #{rolename,jdbcType=VARCHAR},
+      filename = #{filename,jdbcType=VARCHAR},
       version_role = #{versionRole,jdbcType=INTEGER},
       version_file = #{versionFile,jdbcType=INTEGER},
       operation = #{operation,jdbcType=VARCHAR},
-      tag = #{tag,jdbcType=VARCHAR},
-      cipher_fk = #{cipherFk,jdbcType=VARCHAR}
+      tag = #{tag,jdbcType=INTEGER},
+      cipher_fk = #{cipherFk,jdbcType=LONGVARCHAR},
+      signature = #{signature,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select id, rolename, version_role, version_file, operation, tag, cipher_fk
+    select id, rolename, filename, version_role, version_file, operation, tag, cipher_fk, 
+    signature
     from fk
     where id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
-    select id, rolename, version_role, version_file, operation, tag, cipher_fk
+    select id, rolename, filename, version_role, version_file, operation, tag, cipher_fk, 
+    signature
     from fk
   </select>
 </mapper>

@@ -1,7 +1,11 @@
 package com.rick.cryptcloud.DO;
 
-public class RK {
+import java.io.Serializable;
+
+public class RK implements Serializable{
     private Integer id;
+
+    private Integer versionRole;
 
     private String username;
 
@@ -11,12 +15,22 @@ public class RK {
 
     private String cryptoRolesign;
 
+    private String signature;
+
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getVersionRole() {
+        return versionRole;
+    }
+
+    public void setVersionRole(Integer versionRole) {
+        this.versionRole = versionRole;
     }
 
     public String getUsername() {
@@ -49,5 +63,13 @@ public class RK {
 
     public void setCryptoRolesign(String cryptoRolesign) {
         this.cryptoRolesign = cryptoRolesign;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 }

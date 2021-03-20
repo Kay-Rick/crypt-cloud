@@ -4,29 +4,29 @@
   <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.User">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="username" jdbcType="VARCHAR" property="username" />
-    <result column="public_key" jdbcType="VARCHAR" property="publicKey" />
-    <result column="private_key" jdbcType="VARCHAR" property="privateKey" />
-    <result column="sign_public" jdbcType="VARCHAR" property="signPublic" />
-    <result column="sign_private" jdbcType="VARCHAR" property="signPrivate" />
+    <result column="public_key" jdbcType="LONGVARCHAR" property="publicKey" />
+    <result column="private_key" jdbcType="LONGVARCHAR" property="privateKey" />
+    <result column="sign_public" jdbcType="LONGVARCHAR" property="signPublic" />
+    <result column="sign_private" jdbcType="LONGVARCHAR" property="signPrivate" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from user
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.User">
-    insert into user (id, username, public_key, 
+    insert into user (username, public_key, 
       private_key, sign_public, sign_private
       )
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{publicKey,jdbcType=VARCHAR}, 
-      #{privateKey,jdbcType=VARCHAR}, #{signPublic,jdbcType=VARCHAR}, #{signPrivate,jdbcType=VARCHAR}
+    values (#{username,jdbcType=VARCHAR}, #{publicKey,jdbcType=LONGVARCHAR}, 
+      #{privateKey,jdbcType=LONGVARCHAR}, #{signPublic,jdbcType=LONGVARCHAR}, #{signPrivate,jdbcType=LONGVARCHAR}
       )
   </insert>
   <update id="updateByUserName" parameterType="com.rick.cryptcloud.DO.User">
     update user
-    set public_key = #{publicKey,jdbcType=VARCHAR},
-      private_key = #{privateKey,jdbcType=VARCHAR},
-      sign_public = #{signPublic,jdbcType=VARCHAR},
-      sign_private = #{signPrivate,jdbcType=VARCHAR}
+    set public_key = #{publicKey,jdbcType=LONGVARCHAR},
+      private_key = #{privateKey,jdbcType=LONGVARCHAR},
+      sign_public = #{signPublic,jdbcType=LONGVARCHAR},
+      sign_private = #{signPrivate,jdbcType=LONGVARCHAR}
     where username = #{username,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">

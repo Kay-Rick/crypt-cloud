@@ -2,6 +2,7 @@ package com.rick.cryptcloud.service.Impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,16 +11,21 @@ import com.google.gson.Gson;
 import com.rick.cryptcloud.DO.CipherFK;
 import com.rick.cryptcloud.DO.Document;
 import com.rick.cryptcloud.DO.F;
+import com.rick.cryptcloud.DO.FK;
+import com.rick.cryptcloud.DO.RK;
 import com.rick.cryptcloud.DO.Role;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.User;
 import com.rick.cryptcloud.DO.UserRole;
 import com.rick.cryptcloud.common.AESUtils;
+import com.rick.cryptcloud.common.AliyunUtils;
 import com.rick.cryptcloud.common.DSAUtils;
 import com.rick.cryptcloud.common.ElgamalUtils;
 import com.rick.cryptcloud.common.RotationUtils;
 import com.rick.cryptcloud.dao.DocumentMapper;
+import com.rick.cryptcloud.dao.FKMapper;
 import com.rick.cryptcloud.dao.FMapper;
+import com.rick.cryptcloud.dao.RKMapper;
 import com.rick.cryptcloud.dao.RoleFileMapper;
 import com.rick.cryptcloud.dao.RoleMapper;
 import com.rick.cryptcloud.dao.UserMapper;
@@ -28,7 +34,7 @@ import com.rick.cryptcloud.service.StoreFileService;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.tomcat.util.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +48,11 @@ public class StoreFileServiceImpl implements StoreFileService {
 
     private final static Gson GSON = new Gson();
 
-    @Value("${file.downloadLocation}")
-    private String downloadLocation;
-
     @Value("${file.uploadLocation}")
     private String uploadLocation;
+
+    @Autowired
+    private AliyunUtils aliyunUtils;
 
     @Autowired
     private UserMapper userMapper;
@@ -66,6 +72,12 @@ public class StoreFileServiceImpl implements StoreFileService {
     @Autowired
     private RoleFileMapper roleFileMapper;
 
+    @Autowired
+    private RKMapper rkMapper;
+
+    @Autowired
+    private FKMapper fkMapper;
+
     private static Map<String, Object> DSAKeys;
 
     private static long p, q;
@@ -80,32 +92,55 @@ public class StoreFileServiceImpl implements StoreFileService {
 
     private static String operation = "rw";
 
-    private static Integer versionFile = 1;
+    private static Integer versionFile = 0;
 
-    private static Integer versionRole = 1;
+    private static Integer versionRole = 0;
 
-    // TODO
-    private static Integer version = 1;
+    private static Integer tag = 0;
 
     private final static String RSK = "RSK";
 
     private final static String RPK = "RPK";
 
+    private final static String suffix = ".txt";
+
 
     @Override
     public void storeFile(String username, String filename) {
-        initDSA();
         
-        // 初始化user
+        generateDSA();
+        
+        User user = initUser(username);
+        
+        List<Role> roleList = initRole();
+        
+        Document document = initFile(filename);
+
+        F f = initF(filename);
+
+        initMapping(username, filename, roleList);
+        
+        List<RK> RKList = initRK(user, roleList);
+
+        List<FK> FKList = initFK(document, roleList);
+
+        uploadTuple(RKList, FKList, f);
+    }
+
+    private User initUser(String username) {
+        User user = null;
         try {
-            log.info("为用户{}生成密钥，并准备写入数据库", username);
-            userMapper.updateByUserName(initUser(username));
+            user = generateUser(username);
+            log.info("为用户{}生成密钥，并准备写入数据库入参：{}", username, GSON.toJson(user));
+            userMapper.updateByUserName(user);
         } catch (Exception e) {
             log.error("用户{}密钥写入数据库失败：{}", username, e.getMessage());
         }
         log.info("用户：{}密钥写入数据库成功", username);
-        
-        // 初始化role
+        return user;
+    }
+
+    private List<Role> initRole() {
         List<Role> roleList = null;
         try {
             log.info("开始查询所有角色");
@@ -113,7 +148,7 @@ public class StoreFileServiceImpl implements StoreFileService {
             log.info("查询全部角色成功：{}", GSON.toJson(roleList));
             for (Role role : roleList) {
                 try {
-                    Role completeRole = initRole(role);
+                    Role completeRole = generateRole(role);
                     log.info("为角色{}生成密钥，并准备写入数据库，入参：{}", role.getRolename(), GSON.toJson(completeRole));
                     roleMapper.updateByRoleName(completeRole);
                 } catch (Exception e) {
@@ -123,32 +158,45 @@ public class StoreFileServiceImpl implements StoreFileService {
         } catch (Exception e) {
             log.error("查询所有角色失败：{}", e.getMessage());
         }
+        log.info("更新roleList中数据");
+        roleList = roleMapper.selectAll();
+        log.info("更新roleList数据完成：{}",GSON.toJson(roleList));
+        return roleList;
+    }
 
-        // 初始化file
+
+    public Document initFile(String filename) {
+        Document document = null;
         try {
-            Document document = initFile(filename);
+            document = generateFile(filename);
             log.info("初始化文件{}生成密钥，并准备写入数据库，入参：{}", filename, GSON.toJson(document));
             documentMapper.insert(document);
         } catch (Exception e) {
             log.error("文件：{}写入数据库失败：{}", filename, e.getMessage());
         }
-        
-        // 初始化F
+        return document;
+    }
+
+
+    public F initF(String filename) {  
+        F f = null;        
         try {
-            F f = initF(filename);
+            f = generateF(filename);
             log.info("初始化F元组：{}，并准备写入数据库，入参：{}", filename, GSON.toJson(f));
-            fMapper.insert(initF(filename));
+            fMapper.insert(f);
         } catch (Exception e) {
             log.error("F元组：{}写入数据库失败：{}", filename, e.getMessage());
         }
-        
-        // 初始化映射关系
+        return f;
+    }
+
+    public void initMapping(String username, String filename, List<Role> roleList) {
         if (null != roleList) {
             for (Role role : roleList) {
                 UserRole userRole = new UserRole();
                 userRole.setRolename(role.getRolename());
                 userRole.setUsername(username);
-                userRole.setVersion(version);
+                userRole.setVersion(versionRole);
                 try {
                     log.info("添加用户角色映射关系：{}", GSON.toJson(userRole));
                     userRoleMapper.insert(userRole);
@@ -167,13 +215,98 @@ public class StoreFileServiceImpl implements StoreFileService {
                 } catch (Exception e) {
                     log.error("添加角色文件映射：{}失败：{}", GSON.toJson(roleFile), e.getMessage());
                 }
+
             }
         }
+    }
+
+    private List<RK> initRK(User user, List<Role> roleList) {
+       List<RK> RKList = new ArrayList<>();
+        if (null != roleList) {
+            for (Role role : roleList) {
+                RK rk = new RK();
+                rk.setVersionRole(versionRole);
+                rk.setRolename(role.getRolename());
+                rk.setUsername(user.getUsername());
+                rk.setCryptoRolekey(ElgamalUtils.encryptByPublicKey(role.getPrivateKey(), user.getPublicKey()));
+                rk.setCryptoRolesign(ElgamalUtils.encryptByPublicKey(role.getSignPrivate(), user.getPublicKey()));
+                String info = rk.getVersionRole() + rk.getUsername() + rk.getRolename() + rk.getCryptoRolekey() + rk.getCryptoRolesign();
+                rk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(info, DSAUtils.getPrivateKey(DSAKeys))));
+                RKList.add(rk);
+                try {
+                    log.info("准备插入RK元组：{}", GSON.toJson(rk));
+                    rkMapper.insert(rk);
+                } catch (Exception e) {
+                    log.error("插入RK元组：{}失败：{}", GSON.toJson(rk), e.getMessage());
+                    continue;
+                }
+                log.info("插入RK元组：{}成功", GSON.toJson(rk));
+            }
+        }
+        return RKList;
         
     }
 
+    private List<FK> initFK(Document document, List<Role> roleList) {
+        List<FK> FKList = new ArrayList<>();
+        if (null != roleList) {
+            for (Role role : roleList) {
+                FK fk = new FK();
+                fk.setRolename(role.getRolename());
+                fk.setFilename(document.getFilename());
+                fk.setVersionRole(versionRole);
+                fk.setVersionFile(versionFile);
+                fk.setOperation(operation);
+                fk.setTag(tag);
+                fk.setCipherFk(ElgamalUtils.encryptByPublicKey(document.getCipherKey(), role.getPublicKey()));
+                String info = fk.getVersionRole() + fk.getVersionFile() + fk.getFilename() + fk.getRolename() + fk.getCipherFk();
+                fk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(info, DSAUtils.getPrivateKey(DSAKeys))));
+                FKList.add(fk);
+                try {
+                    log.info("准备插入FK元组：{}", GSON.toJson(fk));
+                    fkMapper.insert(fk);
+                } catch (Exception e) {
+                    log.error("插入FK元组：{}失败：{}", GSON.toJson(fk), e.getMessage());
+                    continue;
+                }
+                log.info("插入FK元组：{}成功", GSON.toJson(fk));
+            }
+        }
+        return FKList;
+    }
 
-    private void initDSA() {
+
+    private void uploadTuple(List<RK> RKList, List<FK> FKList, F f) {
+        if (null != RKList) {
+            for (RK rk : RKList) {
+                String rkTupleName = rk.getUsername() + "_" + rk.getRolename() + "_" + String.valueOf(rk.getVersionRole()) + suffix;
+                String content = Base64.encodeBase64String(SerializationUtils.serialize(rk));
+                log.info("上传RK元组：{}，Base64编码后内容：{}",rkTupleName, content);
+                aliyunUtils.uploadToServer(rkTupleName, content);
+                log.info("上传RK元组：{}成功", rkTupleName);
+            }
+        }
+
+        if (null != FKList) {
+            for (FK fk : FKList) {
+                String fkTupleName = fk.getRolename() + "_" + fk.getFilename() + "_" + String.valueOf(fk.getVersionRole()) + "_" + String.valueOf(fk.getVersionFile()) + suffix;
+                String content = Base64.encodeBase64String(SerializationUtils.serialize(fk));
+                log.info("上传FK元组：{}，Base64编码后内容：{}", fkTupleName, content);
+                aliyunUtils.uploadToServer(fkTupleName, content);
+                log.info("上传FK元组：{}成功", fkTupleName);
+            }
+        }
+
+        if (null != f) {
+            String fTupleName = f.getFilename() + suffix;
+            String content = Base64.encodeBase64String(SerializationUtils.serialize(f));
+            log.info("上传F元组：{}，Base64编码后内容：{}", fTupleName, content);
+            aliyunUtils.uploadToServer(fTupleName, content);
+            log.info("上传F元组：{}成功", fTupleName);
+        }
+    }
+
+    private void generateDSA() {
         DSAKeys = DSAUtils.initKey();
     }
 
@@ -183,7 +316,7 @@ public class StoreFileServiceImpl implements StoreFileService {
      * @param username
      * @return
      */
-    private User initUser(String username) {
+    private User generateUser(String username) {
         User user = new User();
         user.setUsername(username);
         Map<String, Object> elgamalKeys = ElgamalUtils.initKey();
@@ -199,7 +332,7 @@ public class StoreFileServiceImpl implements StoreFileService {
      * @param role
      * @return
      */
-    private Role initRole(Role role) {
+    private Role generateRole(Role role) {
         Map<String, Object> elgamalKeys = ElgamalUtils.initKey();
         role.setPublicKey(ElgamalUtils.getPublicKey(elgamalKeys));
         role.setPrivateKey(ElgamalUtils.getPrivateKey(elgamalKeys));
@@ -209,7 +342,7 @@ public class StoreFileServiceImpl implements StoreFileService {
     }
 
 
-    private Document initFile(String filename) {
+    private Document generateFile(String filename) {
         Document document = new Document();
         document.setFilename(filename);
         String aeskey = AESUtils.generateAESKey();
@@ -219,7 +352,7 @@ public class StoreFileServiceImpl implements StoreFileService {
         rotationKey = getRotationKey();
         cipherFK.setRpk(String.valueOf(rotationKey.get(RPK)));
         String serialCipherKey = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
-        log.info("Base64编码后的密钥列表：{}", serialCipherKey);
+        log.info("Base64编码序列化的密钥列表：{}", serialCipherKey);
         document.setCipherKey(serialCipherKey);
         try {
             log.info("读取文档：{}", filename);
@@ -245,7 +378,7 @@ public class StoreFileServiceImpl implements StoreFileService {
         return rotationKey;
     }
 
-    private F initF(String filename) {
+    private F generateF(String filename) {
         F f = new F();
         String cryptofile = AESUtils.encryptAES(content, cipherFK.getK0());
         f.setFilename(filename);
@@ -253,5 +386,6 @@ public class StoreFileServiceImpl implements StoreFileService {
         f.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(filename + cryptofile, DSAUtils.getPrivateKey(DSAKeys))));
         return f;
     }
+
 
 }

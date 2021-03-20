@@ -12,7 +12,7 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.F">
-    insert into f ( filename, signature, 
+    insert into f (filename, signature, 
       crypto_file)
     values (#{filename,jdbcType=VARCHAR}, #{signature,jdbcType=VARCHAR}, 
       #{cryptoFile,jdbcType=VARCHAR})

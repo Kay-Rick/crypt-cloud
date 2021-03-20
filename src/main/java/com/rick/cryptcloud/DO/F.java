@@ -1,6 +1,8 @@
 package com.rick.cryptcloud.DO;
 
-public class F {
+import java.io.Serializable;
+
+public class F implements Serializable{
     private Integer id;
 
     private String filename;

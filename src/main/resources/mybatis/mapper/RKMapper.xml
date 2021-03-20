@@ -3,36 +3,42 @@
 <mapper namespace="com.rick.cryptcloud.dao.RKMapper">
   <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.RK">
     <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="version_role" jdbcType="INTEGER" property="versionRole" />
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="rolename" jdbcType="VARCHAR" property="rolename" />
-    <result column="crypto_rolekey" jdbcType="VARCHAR" property="cryptoRolekey" />
-    <result column="crypto_rolesign" jdbcType="VARCHAR" property="cryptoRolesign" />
+    <result column="crypto_rolekey" jdbcType="LONGVARCHAR" property="cryptoRolekey" />
+    <result column="crypto_rolesign" jdbcType="LONGVARCHAR" property="cryptoRolesign" />
+    <result column="signature" jdbcType="LONGVARCHAR" property="signature" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from rk
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.RK">
-    insert into rk (id, username, rolename, 
-      crypto_rolekey, crypto_rolesign)
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{rolename,jdbcType=VARCHAR}, 
-      #{cryptoRolekey,jdbcType=VARCHAR}, #{cryptoRolesign,jdbcType=VARCHAR})
+    insert into rk (version_role, username, 
+      rolename, crypto_rolekey, crypto_rolesign, 
+      signature)
+    values (#{versionRole,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, 
+      #{rolename,jdbcType=VARCHAR}, #{cryptoRolekey,jdbcType=LONGVARCHAR}, #{cryptoRolesign,jdbcType=LONGVARCHAR}, 
+      #{signature,jdbcType=LONGVARCHAR})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.RK">
     update rk
-    set username = #{username,jdbcType=VARCHAR},
+    set version_role = #{versionRole,jdbcType=INTEGER},
+      username = #{username,jdbcType=VARCHAR},
       rolename = #{rolename,jdbcType=VARCHAR},
-      crypto_rolekey = #{cryptoRolekey,jdbcType=VARCHAR},
-      crypto_rolesign = #{cryptoRolesign,jdbcType=VARCHAR}
+      crypto_rolekey = #{cryptoRolekey,jdbcType=LONGVARCHAR},
+      crypto_rolesign = #{cryptoRolesign,jdbcType=LONGVARCHAR},
+      signature = #{signature,jdbcType=LONGVARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select id, username, rolename, crypto_rolekey, crypto_rolesign
+    select id, version_role, username, rolename, crypto_rolekey, crypto_rolesign, signature
     from rk
     where id = #{id,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
-    select id, username, rolename, crypto_rolekey, crypto_rolesign
+    select id, version_role, username, rolename, crypto_rolekey, crypto_rolesign, signature
     from rk
   </select>
 </mapper>
