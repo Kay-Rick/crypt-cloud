@@ -145,7 +145,7 @@ public class UtilsTest {
 
     @Test
     public void test10() {
-        Map<String, Object> keyMap1 =  ElgamalUtils.initKey();
+        Map<String, Object> keyMap1 = ElgamalUtils.initKey();
         Map<String, Object> keyMap2 = ElgamalUtils.initKey();
         System.out.println(ElgamalUtils.getPrivateKey(keyMap1));
         System.out.println();
@@ -154,4 +154,23 @@ public class UtilsTest {
         System.out.println(info);
         System.out.println(ElgamalUtils.decryptByPrivateKey(info, ElgamalUtils.getPrivateKey(keyMap2)));
     }
+
+    @Test
+    public void test11() {
+        String text = "fsdfsdfsdfsad.txt";
+        System.out.println(text.substring(0, text.lastIndexOf(".")));
+    }
+
+    @Test
+    public void test12() {
+        String pv = "MHkCAQAwUAYGKw4HAgEBMEYCIQD4iMDIkbm8WLrXyKDHNcEZEuBdWRqFb729GEgPjw+AMwIhAJYjnFXlwQ3xSpHNFYHRs98FkH0xSTC/pgQMJCH0TqGQBCICIEVV5Lh46Br9g+hhnSdiSYSOos0ZmLo/eXUQiA8gbyzu";
+        String pb = "MHcwUAYGKw4HAgEBMEYCIQD4iMDIkbm8WLrXyKDHNcEZEuBdWRqFb729GEgPjw+AMwIhAJYjnFXlwQ3xSpHNFYHRs98FkH0xSTC/pgQMJCH0TqGQAyMAAiBkTjmbrqN/pfn0hhVF8nneNHQdXtUIByUTcapUZhY79Q==";
+        String text = "MHgCAQAwTwYGKw4HAgEBMEUCIQCm9Vlo1zvdLZH2XR9xyZlsekPDRxIPeeTqRlZI8Z3+LwIgbMNMiTLL3rT9NVLBPhAi4bq2JGsccX81uLlHQ1v6l8kEIgIgbmywUzmDYaKz9cyTDeiGK7Z8JvZeEn/e9ifnpKTrV4s=";
+        System.out.println(pv);
+        System.out.println(pb);
+        String cipher = ElgamalUtils.encryptByPublicKey(text, pb);
+        System.out.println(cipher);
+        System.out.println(ElgamalUtils.decryptByPrivateKey(cipher, pv));
+    }
+
 }

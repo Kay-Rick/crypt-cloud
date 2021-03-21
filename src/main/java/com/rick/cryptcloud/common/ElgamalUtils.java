@@ -60,6 +60,7 @@ public class ElgamalUtils {
      * @return
      */
     public static String encryptByPublicKey(String data, String key) {
+        Security.addProvider(new BouncyCastleProvider());
         Cipher cipher = null;
         String cipherText = "";
         try {
@@ -105,6 +106,7 @@ public class ElgamalUtils {
      * @return
      */
     public static String decryptByPrivateKey(String data, String key) {
+        Security.addProvider(new BouncyCastleProvider());
         Cipher cipher = null;
         String plainText = "";
         try {

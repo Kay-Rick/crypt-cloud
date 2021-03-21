@@ -33,7 +33,7 @@ public class AliyunUtils {
     @Value("${aliyun.locationPrefix}")
     private String cloudPrefix;
 
-    @Value("${file.downloadLocation}")
+    @Value("${file.tupleLocation}")
     private  String localPrefix;
 
     private OSS ossClient;
