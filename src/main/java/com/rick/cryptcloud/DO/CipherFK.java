@@ -13,6 +13,24 @@ public class CipherFK implements Serializable{
 
     private Integer t;
 
+    private Long N;
+
+    public String getKT() {
+        return this.kT;
+    }
+
+    public void setKT(String kT) {
+        this.kT = kT;
+    }
+
+    public Long getN() {
+        return this.N;
+    }
+
+    public void setN(Long N) {
+        this.N = N;
+    }
+
     public Integer getId() {
         return id;
     }

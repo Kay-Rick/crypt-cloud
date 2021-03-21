@@ -21,6 +21,7 @@ import com.rick.cryptcloud.common.AESUtils;
 import com.rick.cryptcloud.common.AliyunUtils;
 import com.rick.cryptcloud.common.DSAUtils;
 import com.rick.cryptcloud.common.ElgamalUtils;
+import com.rick.cryptcloud.common.MailUtils;
 import com.rick.cryptcloud.common.RotationUtils;
 import com.rick.cryptcloud.dao.DocumentMapper;
 import com.rick.cryptcloud.dao.FKMapper;
@@ -53,6 +54,9 @@ public class StoreFileServiceImpl implements StoreFileService {
 
     @Autowired
     private AliyunUtils aliyunUtils;
+
+    @Autowired
+    private MailUtils mailUtils;
 
     @Autowired
     private UserMapper userMapper;
@@ -102,8 +106,11 @@ public class StoreFileServiceImpl implements StoreFileService {
 
     private final static String RPK = "RPK";
 
+    private final static String N = "N";
+
     private final static String suffix = ".txt";
 
+    private final static String mailSubject = "Crypt Cloud";
 
     @Override
     public void storeFile(String username, String filename) {
@@ -125,6 +132,8 @@ public class StoreFileServiceImpl implements StoreFileService {
         List<FK> FKList = initFK(document, roleList);
 
         uploadTuple(RKList, FKList, f);
+
+        sendMail(user);
     }
 
     private User initUser(String username) {
@@ -137,7 +146,7 @@ public class StoreFileServiceImpl implements StoreFileService {
             log.error("用户{}密钥写入数据库失败：{}", username, e.getMessage());
         }
         log.info("用户：{}密钥写入数据库成功", username);
-        return user;
+        return userMapper.selectByUserName(username);
     }
 
     private List<Role> initRole() {
@@ -289,7 +298,8 @@ public class StoreFileServiceImpl implements StoreFileService {
 
         if (null != FKList) {
             for (FK fk : FKList) {
-                String fkTupleName = fk.getRolename() + "_" + fk.getFilename() + "_" + String.valueOf(fk.getVersionRole()) + "_" + String.valueOf(fk.getVersionFile()) + suffix;
+                String filenameWithNoSuffix = fk.getFilename().substring(0, fk.getFilename().lastIndexOf("."));
+                String fkTupleName = fk.getRolename() + "_" + filenameWithNoSuffix + "_" + String.valueOf(fk.getVersionRole()) + "_" + String.valueOf(fk.getVersionFile()) + suffix;
                 String content = Base64.encodeBase64String(SerializationUtils.serialize(fk));
                 log.info("上传FK元组：{}，Base64编码后内容：{}", fkTupleName, content);
                 aliyunUtils.uploadToServer(fkTupleName, content);
@@ -298,12 +308,18 @@ public class StoreFileServiceImpl implements StoreFileService {
         }
 
         if (null != f) {
-            String fTupleName = f.getFilename() + suffix;
+            String fTupleName = f.getFilename();
             String content = Base64.encodeBase64String(SerializationUtils.serialize(f));
             log.info("上传F元组：{}，Base64编码后内容：{}", fTupleName, content);
             aliyunUtils.uploadToServer(fTupleName, content);
             log.info("上传F元组：{}成功", fTupleName);
         }
+    }
+
+
+    private void sendMail(User user) {
+        String mailContent = "Your Security Key is：" + user.getPrivateKey();
+        mailUtils.sendMail(user.getMail(), mailSubject, mailContent);
     }
 
     private void generateDSA() {
@@ -351,6 +367,7 @@ public class StoreFileServiceImpl implements StoreFileService {
         cipherFK.setT(1);
         rotationKey = getRotationKey();
         cipherFK.setRpk(String.valueOf(rotationKey.get(RPK)));
+        cipherFK.setN(rotationKey.get(N));
         String serialCipherKey = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
         log.info("Base64编码序列化的密钥列表：{}", serialCipherKey);
         document.setCipherKey(serialCipherKey);
@@ -375,6 +392,7 @@ public class StoreFileServiceImpl implements StoreFileService {
         rsk = RotationUtils.getRsk(rpk, RotationUtils.genfi(p, q));
         rotationKey.put(RPK, rpk);
         rotationKey.put(RSK, rsk);
+        rotationKey.put(N, p * q);
         return rotationKey;
     }
 

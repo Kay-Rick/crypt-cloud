@@ -11,7 +11,7 @@ public interface UserMapper {
 
     int insert(User record);
 
-    User selectByPrimaryKey(Integer id);
+    User selectByUserName(String username);
 
     List<User> selectAll();
 

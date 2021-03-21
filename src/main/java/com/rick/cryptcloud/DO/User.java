@@ -5,6 +5,8 @@ public class User {
 
     private String username;
 
+    private String mail;
+
     private String publicKey;
 
     private String privateKey;
@@ -27,6 +29,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
     }
 
     public String getPublicKey() {
