@@ -15,5 +15,5 @@ public interface UserRoleMapper {
 
     List<UserRole> selectAll();
 
-    int updateByPrimaryKey(UserRole record);
+    int updateVersion(UserRole record);
 }

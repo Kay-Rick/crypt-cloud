@@ -11,6 +11,16 @@ public class CipherFK implements Serializable{
 
     private String rpk;
 
+    private String rsk;
+
+    public String getRsk() {
+        return this.rsk;
+    }
+
+    public void setRsk(String rsk) {
+        this.rsk = rsk;
+    }
+
     private Integer t;
 
     private Long N;
@@ -70,4 +80,19 @@ public class CipherFK implements Serializable{
     public void setT(Integer t) {
         this.t = t;
     }
+
+
+    @Override
+    public String toString() {
+        return "{" +
+            " id='" + getId() + "'" +
+            ", k0='" + getK0() + "'" +
+            ", kT='" + getKT() + "'" +
+            ", rpk='" + getRpk() + "'" +
+            ", rsk='" + getRsk() + "'" +
+            ", t='" + getT() + "'" +
+            ", N='" + getN() + "'" +
+            "}";
+    }
+
 }

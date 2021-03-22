@@ -17,12 +17,10 @@
     values (#{username,jdbcType=VARCHAR}, #{rolename,jdbcType=VARCHAR}, 
       #{version,jdbcType=INTEGER})
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.UserRole">
+  <update id="updateVersion" parameterType="com.rick.cryptcloud.DO.UserRole">
     update user_role
-    set username = #{username,jdbcType=VARCHAR},
-      rolename = #{rolename,jdbcType=VARCHAR},
-      version = #{version,jdbcType=INTEGER}
-    where id = #{id,jdbcType=INTEGER}
+    set version = #{version,jdbcType=INTEGER}
+    where username = #{username,jdbcType=VARCHAR} and rolename = #{rolename,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select id, username, rolename, version

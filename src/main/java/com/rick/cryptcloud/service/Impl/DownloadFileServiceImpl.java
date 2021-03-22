@@ -11,8 +11,8 @@ import com.rick.cryptcloud.DO.FK;
 import com.rick.cryptcloud.DO.RK;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.UserRole;
-import com.rick.cryptcloud.Enum.ResultEnum;
-import com.rick.cryptcloud.VO.ResultVO;
+import com.rick.cryptcloud.DTO.FileContentDTO;
+import com.rick.cryptcloud.Enum.DTOEnum;
 import com.rick.cryptcloud.common.AESUtils;
 import com.rick.cryptcloud.common.AliyunUtils;
 import com.rick.cryptcloud.common.ElgamalUtils;
@@ -39,6 +39,9 @@ public class DownloadFileServiceImpl implements DownloadFileService {
 
     @Value("${file.tupleLocation}")
     private String tupleLocation;
+
+    @Value("${file.downloadLocation}")
+    private String downloadLocation;
 
     @Autowired
     private UserRoleMapper userRoleMapper;
@@ -76,10 +79,10 @@ public class DownloadFileServiceImpl implements DownloadFileService {
     private static CipherFK cipherFK = null;
 
     @Override
-    public ResultVO<String> downloadFile(String username, String filename, String privatekey) {
+    public FileContentDTO downloadFile(String username, String filename, String privatekey) {
         if (!checkMapping(username, filename)) {
             log.info("该角色无权访问此文件");
-            return new ResultVO<>(ResultEnum.FAILED);
+            return new FileContentDTO(DTOEnum.FAILED);
         }
         log.info("开始下载元组文件");
         downloadTuple();
@@ -99,7 +102,14 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         log.info("开始解密元组获取文件数据");
         String textContent = decrypt(privatekey);
         log.info("解密得到文件数据为：{}", textContent);
-        return new ResultVO<>(textContent);
+        try {
+            log.info("将解密内容写入文件，供用户下载");
+            FileUtils.writeStringToFile(new File(downloadLocation + filename), textContent);
+        } catch (IOException e) {
+            log.error("文件：{}写入异常：{}", filename, e.getMessage());
+            return new FileContentDTO(DTOEnum.FAILED);
+        }
+        return new FileContentDTO(textContent);
     }
 
     /**
@@ -173,6 +183,5 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         log.info("解密内容为：{}", plainText);
         return plainText;
     }
-
 
 }

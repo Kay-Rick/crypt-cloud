@@ -11,7 +11,7 @@ public interface RoleMapper {
 
     int insert(Role record);
 
-    Role selectByPrimaryKey(Integer id);
+    Role selectByRoleName(String rolename);
 
     List<Role> selectAll();
 

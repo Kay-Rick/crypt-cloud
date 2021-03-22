@@ -17,6 +17,7 @@ import com.rick.cryptcloud.DO.Role;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.User;
 import com.rick.cryptcloud.DO.UserRole;
+import com.rick.cryptcloud.DTO.UploadDTO;
 import com.rick.cryptcloud.common.AESUtils;
 import com.rick.cryptcloud.common.AliyunUtils;
 import com.rick.cryptcloud.common.DSAUtils;
@@ -113,8 +114,10 @@ public class StoreFileServiceImpl implements StoreFileService {
     private final static String mailSubject = "Crypt Cloud";
 
     @Override
-    public void storeFile(String username, String filename) {
+    public UploadDTO storeFile(String username, String filename) {
         
+        UploadDTO uploadDTO = new UploadDTO();
+
         generateDSA();
         
         User user = initUser(username);
@@ -134,6 +137,8 @@ public class StoreFileServiceImpl implements StoreFileService {
         uploadTuple(RKList, FKList, f);
 
         sendMail(user);
+
+        return uploadDTO;
     }
 
     private User initUser(String username) {
@@ -367,6 +372,7 @@ public class StoreFileServiceImpl implements StoreFileService {
         cipherFK.setT(1);
         rotationKey = getRotationKey();
         cipherFK.setRpk(String.valueOf(rotationKey.get(RPK)));
+        cipherFK.setRsk(String.valueOf(rotationKey.get(RSK)));
         cipherFK.setN(rotationKey.get(N));
         String serialCipherKey = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
         log.info("Base64编码序列化的密钥列表：{}", serialCipherKey);

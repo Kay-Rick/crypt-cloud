@@ -22,15 +22,13 @@
       #{rolename,jdbcType=VARCHAR}, #{cryptoRolekey,jdbcType=LONGVARCHAR}, #{cryptoRolesign,jdbcType=LONGVARCHAR}, 
       #{signature,jdbcType=LONGVARCHAR})
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.RK">
+  <update id="updateByRoleName" parameterType="com.rick.cryptcloud.DO.RK">
     update rk
     set version_role = #{versionRole,jdbcType=INTEGER},
-      username = #{username,jdbcType=VARCHAR},
-      rolename = #{rolename,jdbcType=VARCHAR},
       crypto_rolekey = #{cryptoRolekey,jdbcType=LONGVARCHAR},
       crypto_rolesign = #{cryptoRolesign,jdbcType=LONGVARCHAR},
       signature = #{signature,jdbcType=LONGVARCHAR}
-    where id = #{id,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR} and username = #{username,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select id, version_role, username, rolename, crypto_rolekey, crypto_rolesign, signature

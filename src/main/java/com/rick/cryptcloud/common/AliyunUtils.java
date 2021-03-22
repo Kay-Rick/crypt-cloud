@@ -34,7 +34,10 @@ public class AliyunUtils {
     private String cloudPrefix;
 
     @Value("${file.tupleLocation}")
-    private  String localPrefix;
+    private String localPrefix;
+
+    @Value("${file.updateLocation}")
+    private String updatePrefix;
 
     private OSS ossClient;
 
@@ -52,6 +55,14 @@ public class AliyunUtils {
         ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
         log.info("准备下载文件：{}到本地", filename);
         ossClient.getObject(new GetObjectRequest(bucket, cloudPrefix + filename), new File(localPrefix + filename));
+        log.info("文件：{}下载完成", filename);
+        ossClient.shutdown();
+    }
+
+    public void downloadToUpdate(String filename) {
+        ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        log.info("准备下载文件：{}到本地", filename);
+        ossClient.getObject(new GetObjectRequest(bucket, cloudPrefix + filename), new File(updatePrefix + filename));
         log.info("文件：{}下载完成", filename);
         ossClient.shutdown();
     }

@@ -1,8 +1,9 @@
 package com.rick.cryptcloud.service;
 
+import com.rick.cryptcloud.DTO.UploadDTO;
 
 public interface StoreFileService {
     
-    void storeFile(String username, String filename);
+    UploadDTO storeFile(String username, String filename);
     
 }

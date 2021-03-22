@@ -10,18 +10,18 @@ public class ResultVO<T> {
 
     private T data;
 
-    public ResultVO(T data) {
-        this(ResultEnum.SUCCESS, data);
-    }
+    // public ResultVO(T data) {
+    //     this(ResultEnum.SUCCESS, data);
+    // }
 
-    public ResultVO(ResultEnum resultCode) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
-    }
+    // public ResultVO(ResultEnum result) {
+    //     this.code = result.getCode();
+    //     this.message = result.getMsg();
+    // }
 
-    public ResultVO(ResultEnum resultCode, T data) {
-        this.code = resultCode.getCode();
-        this.message = resultCode.getMsg();
+    public ResultVO(ResultEnum result, T data) {
+        this.code = result.getCode();
+        this.message = result.getMsg();
         this.data = data;
     }
 

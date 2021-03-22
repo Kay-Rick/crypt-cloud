@@ -1,9 +1,9 @@
 package com.rick.cryptcloud.service;
 
-import com.rick.cryptcloud.VO.ResultVO;
+import com.rick.cryptcloud.DTO.FileContentDTO;
 
 public interface DownloadFileService {
 
-    ResultVO<String> downloadFile(String username, String filename, String privatekey);
+    FileContentDTO downloadFile(String username, String filename, String privatekey);
     
 }

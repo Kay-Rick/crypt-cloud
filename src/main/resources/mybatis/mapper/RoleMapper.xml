@@ -29,10 +29,10 @@
       sign_private = #{signPrivate,jdbcType=LONGVARCHAR}
     where rolename = #{rolename,jdbcType=VARCHAR}
   </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  <select id="selectByRoleName" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, rolename, public_key, private_key, sign_public, sign_private
     from role
-    where id = #{id,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, rolename, public_key, private_key, sign_public, sign_private
