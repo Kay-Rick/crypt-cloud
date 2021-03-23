@@ -36,7 +36,7 @@ public class AliyunUtils {
     @Value("${file.tupleLocation}")
     private String localPrefix;
 
-    @Value("${file.updateLocation}")
+    @Value("${file.updateLocationPrefix}")
     private String updatePrefix;
 
     private OSS ossClient;

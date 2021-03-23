@@ -40,7 +40,7 @@ public class RevokeServiceImpl implements RevokeService {
 
     private final static Gson GSON = new Gson();
 
-    @Value("${file.updateLocation}")
+    @Value("${file.updateLocationPrefix}")
     private String updatePrefix;
 
     @Autowired
@@ -71,20 +71,22 @@ public class RevokeServiceImpl implements RevokeService {
             // 重新为role生成密钥
             Map<String, Object> elgamalKey = generateElgamal();
             Map<String, Object> DSAKey = generateDSA();
-            
+            RK rk = new RK();
+            FK fk = null;
             // 删除userrole映射
             log.info("查所有UserRole的映射");
             List<UserRole> userRoleList = userRoleMapper.selectAll();
             log.info("查询UserRole映射出参：{}", GSON.toJson(userRoleList));
             for (UserRole userRole : userRoleList) {
-                if (username.equals(userRole.getUsername()) || rolename.equals(userRole.getRolename())) {
+                if (!username.equals(userRole.getUsername()) || !rolename.equals(userRole.getRolename())) {
                     log.info("查询其余用户：{}信息", username);
                     User user = userMapper.selectByUserName(username);
                     // 更新RK
-                    RK rk = new RK();
                     rk.setRolename(rolename);
                     rk.setUsername(username);
                     userRole.setVersion(userRole.getVersion() + 1);
+
+                    // 需更新的RK内容
                     rk.setVersionRole(userRole.getVersion());
                     rk.setCryptoRolekey(ElgamalUtils.encryptByPublicKey(ElgamalUtils.getPrivateKey(elgamalKey),
                             user.getPublicKey()));
@@ -94,6 +96,8 @@ public class RevokeServiceImpl implements RevokeService {
                             + rk.getCryptoRolesign();
                     rk.setSignature(
                             DSAUtils.getSignature(DSAUtils.signatureData(info, DSAUtils.getPrivateKey(DSAKey))));
+                    // TODO: 更新内容发送MQ委派更新存储在云中的内容：rk.setXXX()  => Cloud
+
                     try {
                         log.info("开始更新RK信息：{}", GSON.toJson(rk));
                         rkMapper.updateByRoleName(rk);
@@ -107,6 +111,7 @@ public class RevokeServiceImpl implements RevokeService {
                     } catch (Exception e) {
                         log.error("更新userRole：{}失败", GSON.toJson(userRole));
                     }
+                
                 }
                 
                 // 更新FK元组
@@ -124,7 +129,6 @@ public class RevokeServiceImpl implements RevokeService {
                         aliyunUtils.downloadToUpdate(fkTupleName);
                         log.info("下载FK元组成功");
                         String fkContent;
-                        FK fk = null;
                         try {
                             log.info("FK元组开始反序列化");
                             fkContent = FileUtils.readFileToString(new File(updatePrefix + fkTupleName));
@@ -144,6 +148,8 @@ public class RevokeServiceImpl implements RevokeService {
                         String cipherList = ElgamalUtils.decryptByPrivateKey(fk.getCipherFk(), role.getPrivateKey());
                         CipherFK cipherFK = SerializationUtils.deserialize(Base64.decodeBase64(cipherList));
                         log.info("反序列化得密钥列表：{}", GSON.toJson(cipherFK));
+                        log.info("开始更新密钥列表");
+                        
                         String rsk = cipherFK.getRsk();
                         String kt = cipherFK.getKT();
                         Long N = cipherFK.getN();
@@ -152,7 +158,26 @@ public class RevokeServiceImpl implements RevokeService {
                         if (cipherFK.getT() < MAX_ROUND) {
                             cipherFK.setT(cipherFK.getT() + 1);
                         }
+                        log.info("密钥列表更新完成：{}", GSON.toJson(cipherFK));
                         cipherList = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
+
+                        // 找到要更新的file对应的角色重新加密
+                        for (int j = 0; j < roleFileList.size(); j++) {
+                            if (roleFile.getRolename().equals(roleFileList.get(j).getRolename())) {
+                                Role updateRole = null;
+                                try {
+                                    log.info("开始查询role");
+                                    updateRole = roleMapper.selectByRoleName(roleFile.getRolename());
+                                    log.info("查询Role：{}成功", GSON.toJson(updateRole));
+                                } catch (Exception e) {
+                                    log.error("查询Role：{}失败：{}", GSON.toJson(updateRole), e.getMessage());
+                                }
+                                
+                                // 需更新的密钥列表内容
+                                String updateCipherFK = ElgamalUtils.encryptByPublicKey(cipherList, updateRole.getPublicKey());
+                                // TODO：发送MQ委派更新FK元组 fk.setCipherFk(updateCipherFK)  ==> Cloud
+                            }
+                        }
                     }
                 }
             }

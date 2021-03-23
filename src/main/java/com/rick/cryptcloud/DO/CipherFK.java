@@ -13,6 +13,10 @@ public class CipherFK implements Serializable{
 
     private String rsk;
 
+    private Integer t;
+
+    private Long N;
+
     public String getRsk() {
         return this.rsk;
     }
@@ -20,10 +24,6 @@ public class CipherFK implements Serializable{
     public void setRsk(String rsk) {
         this.rsk = rsk;
     }
-
-    private Integer t;
-
-    private Long N;
 
     public String getKT() {
         return this.kT;
