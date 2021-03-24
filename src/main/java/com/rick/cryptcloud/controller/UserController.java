@@ -2,7 +2,9 @@ package com.rick.cryptcloud.controller;
 
 import com.google.gson.Gson;
 import com.rick.cryptcloud.DO.User;
+import com.rick.cryptcloud.DTO.BasicDTO;
 import com.rick.cryptcloud.DTO.FileContentDTO;
+import com.rick.cryptcloud.Enum.DTOEnum;
 import com.rick.cryptcloud.Enum.ResultEnum;
 import com.rick.cryptcloud.VO.ResultVO;
 import com.rick.cryptcloud.service.DownloadFileService;
@@ -58,6 +60,18 @@ public class UserController {
         List<User> list = userService.queryAll();
         log.info("处理完毕，返回结果");
         return list;
+    }
+
+    @RequestMapping("register")
+    public ResultVO<String> registerUser(String username, String email, String password) {
+        BasicDTO userDTO = null;
+        log.info("用户注册信息：username：{}, email：{}, password：{}", username, email, password);
+        log.info("开始注册");
+        userDTO = userService.addUser(username, email, password);
+        if (userDTO.getCode() == DTOEnum.FAILED.getCode())
+            return new ResultVO<>(ResultEnum.FAILED, userDTO.getMessage());
+        else
+            return new ResultVO<>(ResultEnum.SUCCESS, userDTO.getMessage());
     }
 
     @RequestMapping("upload")

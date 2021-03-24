@@ -5,6 +5,7 @@
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="mail" jdbcType="VARCHAR" property="mail" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
     <result column="public_key" jdbcType="LONGVARCHAR" property="publicKey" />
     <result column="private_key" jdbcType="LONGVARCHAR" property="privateKey" />
     <result column="sign_public" jdbcType="LONGVARCHAR" property="signPublic" />
@@ -15,29 +16,28 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.rick.cryptcloud.DO.User">
-    insert into user (username, mail, 
+    insert into user (username, mail, password, 
       public_key, private_key, sign_public, 
       sign_private)
-    values (#{username,jdbcType=VARCHAR}, #{mail,jdbcType=VARCHAR}, 
+    values (#{username,jdbcType=VARCHAR}, #{mail,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
       #{publicKey,jdbcType=LONGVARCHAR}, #{privateKey,jdbcType=LONGVARCHAR}, #{signPublic,jdbcType=LONGVARCHAR}, 
       #{signPrivate,jdbcType=LONGVARCHAR})
   </insert>
   <update id="updateByUserName" parameterType="com.rick.cryptcloud.DO.User">
     update user
-    set username = #{username,jdbcType=VARCHAR},
-      public_key = #{publicKey,jdbcType=LONGVARCHAR},
+    set public_key = #{publicKey,jdbcType=LONGVARCHAR},
       private_key = #{privateKey,jdbcType=LONGVARCHAR},
       sign_public = #{signPublic,jdbcType=LONGVARCHAR},
       sign_private = #{signPrivate,jdbcType=LONGVARCHAR}
     where username = #{username,jdbcType=VARCHAR}
   </update>
   <select id="selectByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select id, username, mail, public_key, private_key, sign_public, sign_private
+    select id, username, mail, password, public_key, private_key, sign_public, sign_private
     from user
     where username = #{username,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
-    select id, username, mail, public_key, private_key, sign_public, sign_private
+    select id, username, mail, password, public_key, private_key, sign_public, sign_private
     from user
   </select>
 </mapper>

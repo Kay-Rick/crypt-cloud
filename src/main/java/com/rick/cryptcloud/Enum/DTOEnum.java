@@ -4,7 +4,7 @@ public enum DTOEnum {
     
     SUCCESS(200, "操作成功"),
 
-    FAILED(404, "响应失败"),
+    FAILED(404, "操作失败"),
 
     ERROR(500, "未知错误");
 

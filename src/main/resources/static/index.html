@@ -8,28 +8,62 @@
 </head>
 
 <body>
-
+<!-- 
     <h2>测试文件上传</h2>
 
     <form action="http://localhost:8080/crypt-cloud/user/upload" method="post" enctype="multipart/form-data">
         用户名：<input type="text" name="username" /><br>
         文件<input type="file" name="file" /><br>
-        <!-- 多文件上传要加 mutiple -->
-        <!-- 文件：<input type="file" name="files" multiple></br> -->
+        <input type="submit" value="上传">
+    </form>
+    <br>
+    <br>
+    <br> -->
+
+    <h2>用户注册</h2>
+    <form action="http://localhost:8080/crypt-cloud/user/register" method="post" enctype="multipart/form-data">
+        用户名：<input type="text" name="username" /><br>
+        邮箱：<input type="text" name="email" /><br>
+        密码：<input type="password" name="password" /><br>
+        <input type="submit" value="注册">
+    </form>
+    <br>
+    <br>
+    <br>
+    <h2>添加角色</h2>
+    <form action="http://localhost:8080/crypt-cloud/role/add" method="post" enctype="multipart/form-data">
+        角色名：<input type="text" name="rolename" /><br>
+        <input type="submit" value="添加">
+    </form>
+    <br>
+    <br>
+    <br>
+    <h2>分配角色</h2>
+    <form action="http://localhost:8080/crypt-cloud/role/assign" method="post" enctype="multipart/form-data">
+        用户名：<input type="text" name="username" /><br>
+        角色名：<input type="text" name="rolename" /><br>
+        <input type="submit" value="添加">
+    </form>
+    <br>
+    <br>
+    <br>
+    <h2>文件上传</h2>
+    <form action="http://localhost:8080/crypt-cloud/role/upload" method="post" enctype="multipart/form-data">
+        角色名：<input type="text" name="rolename" /><br>
+        文件<input type="file" name="file" /><br>
         <input type="submit" value="上传">
     </form>
     <br>
     <br>
     <br>
-
     <h2>测试文件下载</h2>
-        <form action="http://localhost:8080/crypt-cloud/user/download" method="post" enctype="multipart/form-data">
-            用户名：<input type="text" name="username" /><br>
-            文件名<input type="text" name="filename" /><br>
-            密钥<input type="text" name="privatekey"/><br>
-            <input type="submit" value="下载">
-        </form>
-    <!-- <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.4.1.min.js"></script> -->
+    <form action="http://localhost:8080/crypt-cloud/user/download" method="post" enctype="multipart/form-data">
+        用户名：<input type="text" name="username" /><br>
+        文件名<input type="text" name="filename" /><br>
+        密钥<input type="text" name="privatekey" /><br>
+        <input type="submit" value="下载">
+    </form>
+    
 </body>
 
 </html>

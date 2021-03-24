@@ -7,6 +7,8 @@ public class User {
 
     private String mail;
 
+    private String password;
+
     private String publicKey;
 
     private String privateKey;
@@ -37,6 +39,14 @@ public class User {
 
     public void setMail(String mail) {
         this.mail = mail;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPublicKey() {
