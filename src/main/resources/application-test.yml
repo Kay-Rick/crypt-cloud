@@ -4,7 +4,7 @@ server:
     context-path: /crypt-cloud
 
 logging:
-  config: classpath:\\config\\logging-config.xml
+  config: classpath:config/logging-config.xml
 
 spring:
   datasource:
@@ -88,8 +88,8 @@ spring:
       max-request-size: 10240MB
 
   mail:
-    host: smtp.gmail.com
-    username: xxxxx@gmail.com
+    host: smtp.163.com
+    username: xxxxx@163.com
     password: xxxxxx
     properties:
       mail:
@@ -98,6 +98,12 @@ spring:
           starttls:
             enable: true
             required: true
+  rabbitmq:
+    host: 192.168.3.100
+    port: 5672
+    username: Kay
+    password: 257098
+    virtual-host: /
 
 mybatis:
   # config-location: classpath:mybatis/mybatis-config.xml
@@ -111,9 +117,13 @@ file:
   baseLocation: D:\\Server\\Crypt-Cloud\\
   downloadLocation: D:\\Server\\Crypt-Cloud\\download\\
   uploadLocation: D:\\Server\\Crypt-Cloud\\upload\\
+  tupleLocation: D:\\Server\\Crypt-Cloud\\tuple\\
+  updateLocation: D:\\Server\\Crypt-Cloud\\tuple\\upload\\
 
 
 aliyun:
   endpoint: https://oss-cn-beijing.aliyuncs.com
   accessKeyId: xxxxx
   accessKeySecret: xxxxxx
+  bucket: crypt-cloud
+  locationPrefix: crypt-cloud/

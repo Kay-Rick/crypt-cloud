@@ -96,6 +96,14 @@ spring:
           starttls:
             enable: true
             required: true
+  rabbitmq:
+    host: 192.168.3.100
+    port: 5672
+    username: Kay
+    password: 257098
+    virtual-host: /
+    publisher-confirm-type: correlated
+    publisher-returns: true
 
 mybatis:
   # config-location: classpath:mybatis/mybatis-config.xml
@@ -104,13 +112,16 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
-
 file:
   baseLocation: D:\\Server\\Crypt-Cloud\\
   downloadLocation: D:\\Server\\Crypt-Cloud\\download\\
   uploadLocation: D:\\Server\\Crypt-Cloud\\upload\\
+  tupleLocation: D:\\Server\\Crypt-Cloud\\tuple\\
+  updateLocationPrefix: D:\\Server\\Crypt-Cloud\\tuple\\upload\\
 
 aliyun:
   endpoint: https://oss-cn-beijing.aliyuncs.com
   accessKeyId: xxxxx
   accessKeySecret: xxxxxx
+  bucket: crypt-cloud
+  locationPrefix: crypt-cloud/
