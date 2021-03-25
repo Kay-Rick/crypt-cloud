@@ -22,7 +22,7 @@
       #{rolename,jdbcType=VARCHAR}, #{cryptoRolekey,jdbcType=LONGVARCHAR}, #{cryptoRolesign,jdbcType=LONGVARCHAR}, 
       #{signature,jdbcType=LONGVARCHAR})
   </insert>
-  <update id="updateByRoleName" parameterType="com.rick.cryptcloud.DO.RK">
+  <update id="updateCrypt" parameterType="com.rick.cryptcloud.DO.RK">
     update rk
     set version_role = #{versionRole,jdbcType=INTEGER},
       crypto_rolekey = #{cryptoRolekey,jdbcType=LONGVARCHAR},

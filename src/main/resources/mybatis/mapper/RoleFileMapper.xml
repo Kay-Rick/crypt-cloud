@@ -21,14 +21,11 @@
       #{operation,jdbcType=VARCHAR}, #{versionFile,jdbcType=INTEGER}, #{versionRole,jdbcType=INTEGER}
       )
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.RoleFile">
+  <update id="updateRoleVersion" parameterType="com.rick.cryptcloud.DO.RoleFile">
     update role_file
     set rolename = #{rolename,jdbcType=VARCHAR},
-      filename = #{filename,jdbcType=VARCHAR},
-      operation = #{operation,jdbcType=VARCHAR},
-      version_file = #{versionFile,jdbcType=INTEGER},
       version_role = #{versionRole,jdbcType=INTEGER}
-    where id = #{id,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR} and filename = #{filename,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select id, rolename, filename, operation, version_file, version_role

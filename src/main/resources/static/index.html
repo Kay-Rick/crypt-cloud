@@ -63,7 +63,15 @@
         密钥<input type="text" name="privatekey" /><br>
         <input type="submit" value="下载">
     </form>
-    
+    <br>
+    <br>
+    <br>
+    <h2>测试权限撤销</h2>
+    <form action="http://localhost:8080/crypt-cloud/revoke/role" method="post" enctype="multipart/form-data">
+        用户名：<input type="text" name="username" /><br>
+        角色名<input type="text" name="rolename" /><br>
+        <input type="submit" value="撤销">
+    </form>
 </body>
 
 </html>

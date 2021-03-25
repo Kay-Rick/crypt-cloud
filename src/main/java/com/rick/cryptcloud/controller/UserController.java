@@ -62,6 +62,13 @@ public class UserController {
         return list;
     }
 
+    /**
+     * 用户注册
+     * @param username
+     * @param email
+     * @param password
+     * @return
+     */
     @RequestMapping("register")
     public ResultVO<String> registerUser(String username, String email, String password) {
         BasicDTO userDTO = null;

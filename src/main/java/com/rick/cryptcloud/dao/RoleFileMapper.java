@@ -15,5 +15,5 @@ public interface RoleFileMapper {
 
     List<RoleFile> selectAll();
 
-    int updateByPrimaryKey(RoleFile record);
+    int updateRoleVersion(RoleFile record);
 }

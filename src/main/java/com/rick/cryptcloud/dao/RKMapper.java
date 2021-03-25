@@ -15,5 +15,5 @@ public interface RKMapper {
 
     List<RK> selectAll();
 
-    int updateByRoleName(RK record);
+    int updateCrypt(RK record);
 }

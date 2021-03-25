@@ -26,23 +26,24 @@
       #{tag,jdbcType=INTEGER}, #{cipherFk,jdbcType=LONGVARCHAR}, #{signature,jdbcType=LONGVARCHAR}
       )
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.FK">
+  <update id="updateCrypt" parameterType="com.rick.cryptcloud.DO.FK">
     update fk
-    set rolename = #{rolename,jdbcType=VARCHAR},
-      filename = #{filename,jdbcType=VARCHAR},
-      version_role = #{versionRole,jdbcType=INTEGER},
-      version_file = #{versionFile,jdbcType=INTEGER},
-      operation = #{operation,jdbcType=VARCHAR},
-      tag = #{tag,jdbcType=INTEGER},
+    set version_role = #{versionRole,jdbcType=INTEGER},
       cipher_fk = #{cipherFk,jdbcType=LONGVARCHAR},
       signature = #{signature,jdbcType=LONGVARCHAR}
-    where id = #{id,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR} and filename = #{filename,jdbcType=VARCHAR}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select id, rolename, filename, version_role, version_file, operation, tag, cipher_fk, 
     signature
     from fk
     where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByName" resultMap="BaseResultMap">
+    select id, rolename, filename, version_role, version_file, operation, tag, cipher_fk, 
+    signature
+    from fk
+    where rolename = #{rolename} and filename = #{filename}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, rolename, filename, version_role, version_file, operation, tag, cipher_fk, 

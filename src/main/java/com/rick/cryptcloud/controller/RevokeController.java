@@ -21,7 +21,9 @@ public class RevokeController {
     private RevokeService revokeService;
 
     @RequestMapping("role")
-    public void userRevoke(String username, String rolename) {
+    public String userRevoke(String username, String rolename) {
+        log.info("撤销用户：{}的角色：{}权限", username, rolename);
         revokeService.revokeUserRole(username, rolename);
+        return "Success";
     }
 }

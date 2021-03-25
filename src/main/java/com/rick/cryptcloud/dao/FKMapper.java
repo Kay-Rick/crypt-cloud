@@ -2,6 +2,7 @@ package com.rick.cryptcloud.dao;
 
 import com.rick.cryptcloud.DO.FK;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -12,8 +13,10 @@ public interface FKMapper {
     int insert(FK record);
 
     FK selectByPrimaryKey(Integer id);
+    
+    FK selectByName(@Param("rolename") String rolename, @Param("filename") String filename);
 
     List<FK> selectAll();
 
-    int updateByPrimaryKey(FK record);
+    int updateCrypt(FK record);
 }

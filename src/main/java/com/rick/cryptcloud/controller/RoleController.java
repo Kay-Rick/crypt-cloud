@@ -28,6 +28,11 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
     
+    /**
+     * 添加角色
+     * @param rolename
+     * @return
+     */
     @RequestMapping("add")
     public ResultVO<String> addRole(String rolename) {
         log.info("开始添加角色：{}", rolename);
@@ -40,6 +45,12 @@ public class RoleController {
         return new ResultVO<>(ResultEnum.SUCCESS, roleDTO.getMessage());
     }
 
+    /**
+     * 用户授予角色权限
+     * @param rolename
+     * @param username
+     * @return
+     */
     @RequestMapping("assign")
     public ResultVO<String> addUser(String rolename, String username) {
         log.info("开始为用户：{}授角色：{}权限", username, rolename);
@@ -52,6 +63,12 @@ public class RoleController {
         return new ResultVO<>(ResultEnum.SUCCESS, "为用户授权成功");
     }
 
+    /**
+     * 为role角色上传文件
+     * @param rolename
+     * @param file
+     * @return
+     */
     @RequestMapping("upload")
     public ResultVO<String> addFile(String rolename, @RequestPart("file") MultipartFile file) {
         if (!file.isEmpty()) {
