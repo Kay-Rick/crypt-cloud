@@ -1,9 +1,6 @@
 package com.rick.cryptcloud.MQ;
 
-import java.io.Serializable;
-import java.util.Map;
-
-public class RKUpdate implements Serializable {
+public class RKUpdate {
     
     private String username;
 
@@ -11,7 +8,7 @@ public class RKUpdate implements Serializable {
 
     private Integer versionRole;
 
-    private Map<String, Object> updateInfo;
+    private RKUpdateInfo updateInfo;
 
     public String getUsername() {
         return this.username;
@@ -37,12 +34,14 @@ public class RKUpdate implements Serializable {
         this.versionRole = versionRole;
     }
 
-    public Map<String,Object> getUpdateInfo() {
+
+    public RKUpdateInfo getUpdateInfo() {
         return this.updateInfo;
     }
 
-    public void setUpdateInfo(Map<String,Object> updateInfo) {
+    public void setUpdateInfo(RKUpdateInfo updateInfo) {
         this.updateInfo = updateInfo;
     }
+
 
 }

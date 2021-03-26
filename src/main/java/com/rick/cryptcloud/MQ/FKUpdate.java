@@ -1,21 +1,44 @@
 package com.rick.cryptcloud.MQ;
 
-import java.io.Serializable;
-import java.util.Map;
-
-
-public class FKUpdate implements Serializable {
+public class FKUpdate {
     
     private String rolename;
 
     private String filename;
 
+    private String operation;
+
+    private Integer tag;
+
     private Integer versionRole;
 
     private Integer versionFile;
 
-    private Map<String, Object> updateInfo;
+    private FKUpdateInfo updateInfo;
 
+    public String getOperation() {
+        return this.operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
+    }
+
+    public Integer getTag() {
+        return this.tag;
+    }
+
+    public void setTag(Integer tag) {
+        this.tag = tag;
+    }
+
+    public FKUpdateInfo getUpdateInfo() {
+        return this.updateInfo;
+    }
+
+    public void setUpdateInfo(FKUpdateInfo updateInfo) {
+        this.updateInfo = updateInfo;
+    }
 
     public String getRolename() {
         return this.rolename;
@@ -47,14 +70,6 @@ public class FKUpdate implements Serializable {
 
     public void setVersionFile(Integer versionFile) {
         this.versionFile = versionFile;
-    }
-
-    public Map<String,Object> getUpdateInfo() {
-        return this.updateInfo;
-    }
-
-    public void setUpdateInfo(Map<String,Object> updateInfo) {
-        this.updateInfo = updateInfo;
     }
 
 }

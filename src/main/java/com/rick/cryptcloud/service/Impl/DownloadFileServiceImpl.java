@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rick.cryptcloud.DO.CipherFK;
 import com.rick.cryptcloud.DO.F;
 import com.rick.cryptcloud.DO.FK;
@@ -35,7 +36,7 @@ public class DownloadFileServiceImpl implements DownloadFileService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     @Value("${file.tupleLocation}")
     private String tupleLocation;
@@ -78,6 +79,8 @@ public class DownloadFileServiceImpl implements DownloadFileService {
 
     private static CipherFK cipherFK = null;
 
+    private static boolean flag = false;
+
     @Override
     public FileContentDTO downloadFile(String username, String filename, String privatekey) {
         if (!checkMapping(username, filename)) {
@@ -101,6 +104,10 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         log.info("反序列化结果：RK：{}，FK：{}，F：{}", GSON.toJson(rk), GSON.toJson(fk), GSON.toJson(f));
         log.info("开始解密元组获取文件数据");
         String textContent = decrypt(privatekey);
+        if (!flag) {
+            log.info("该用户无法解密该文件");
+            return new FileContentDTO(DTOEnum.FAILED);
+        }
         log.info("解密得到文件数据为：{}", textContent);
         try {
             log.info("将解密内容写入文件，供用户下载");
@@ -161,7 +168,13 @@ public class DownloadFileServiceImpl implements DownloadFileService {
      * @return
      */
     public String decrypt(String privatekey) {
-        String rolePrivateKey = ElgamalUtils.decryptByPrivateKey(rk.getCryptoRolekey(), privatekey);
+        String rolePrivateKey = null;
+        try {
+            rolePrivateKey = ElgamalUtils.decryptByPrivateKey(rk.getCryptoRolekey(), privatekey);
+        } catch (Exception e) {
+            log.error("解密失败：", e.getMessage());        
+        }
+        
         log.info("rolePrivateKey:{}", rolePrivateKey);
         String cipherKeyList = ElgamalUtils.decryptByPrivateKey(fk.getCipherFk(), rolePrivateKey);
         log.info("开始反序列化密钥列表");
@@ -169,18 +182,23 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         log.info("反序列化密钥列表结果：{}", GSON.toJson(cipherFK));
         String cipherText = f.getCryptoFile();
         int round = cipherFK.getT();
-        String k = cipherFK.getK0();
+        String kt = cipherFK.getKT();
         rpk = Long.valueOf(cipherFK.getRpk());
         long N = cipherFK.getN();
         log.info("开始获取密钥列表");
-        long[] keylist = RotationUtils.FDri(rpk, Long.parseLong(k), round, N);
+        long[] keylist = RotationUtils.FDri(rpk, Long.parseLong(kt), round, N);
         log.info("密钥列表为：{}", GSON.toJson(keylist));
         String plainText = "";
         for (int i = round - 1; i >= 0; i--) {
-            plainText = AESUtils.decryptAES(cipherText, String.valueOf(keylist[i]));
-            cipherText = plainText;
+            try {
+                plainText = AESUtils.decryptAES(cipherText, String.valueOf(keylist[i]));
+                cipherText = plainText;
+            } catch (Exception e) {
+                log.error("解密失败：", e.getMessage());
+            }
         }
-        log.info("解密内容为：{}", plainText);
+        log.info("解密成功,内容为：{}", plainText);
+        flag = true;
         return plainText;
     }
 

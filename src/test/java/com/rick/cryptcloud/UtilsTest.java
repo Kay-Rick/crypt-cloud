@@ -1,5 +1,6 @@
 package com.rick.cryptcloud;
 
+import com.google.gson.Gson;
 import com.rick.cryptcloud.DO.CipherFK;
 import com.rick.cryptcloud.common.*;
 import org.apache.commons.io.FileUtils;
@@ -10,11 +11,14 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
 public class UtilsTest {
 
     private final String baseLocation = "/Users/rick/Desktop/Server/Crypt-Cloud/";
+
+    private static final Gson GSON = new Gson();
 
 
     @Test
@@ -137,7 +141,7 @@ public class UtilsTest {
         System.out.println(cur);
         System.out.println();
 
-        long[]  result = RotationUtils.FDri(rpk, cur, 10, N);
+        long[] result = RotationUtils.FDri(rpk, cur, 10, N);
         for (long item : result) {
             System.out.println(item);
         }
@@ -173,4 +177,56 @@ public class UtilsTest {
         System.out.println(ElgamalUtils.decryptByPrivateKey(cipher, pv));
     }
 
+
+    @Test
+    public void ratationTest() {
+        String text = "Hello Rick";
+        String k1 = AESUtils.generateAESKey();
+
+        CipherFK cipherFK = new CipherFK();
+        cipherFK.setK0(k1);
+        cipherFK.setkT(k1);
+        cipherFK.setT(1);
+        long p = RotationUtils.genPrime();
+        long q = RotationUtils.genPrime();
+        long rpk = RotationUtils.getRpk(RotationUtils.genfi(p, q));
+        long rsk = RotationUtils.getRsk(rpk, RotationUtils.genfi(p, q));
+        Map<String, Long> rotationKey = new HashMap<>();
+        rotationKey.put("RPK", rpk);
+        rotationKey.put("RSK", rsk);
+        rotationKey.put("N", p * q);
+        cipherFK.setRpk(String.valueOf(rotationKey.get("RPK")));
+        cipherFK.setRsk(String.valueOf(rotationKey.get("RSK")));
+        cipherFK.setN(rotationKey.get("N"));
+        
+        System.out.println(GSON.toJson(cipherFK));
+        String cipher1 = AESUtils.encryptAES(text, cipherFK.getK0());
+        System.out.println();
+        System.out.println();
+        System.out.println(cipher1);
+
+        Long next = RotationUtils.BDri(Long.valueOf(rsk), Long.valueOf(cipherFK.getkT()), cipherFK.getN());
+        System.out.println(next);
+        cipherFK.setKT(String.valueOf(next));
+        // 安全模式：添加加密层，使密钥列表多一个密钥
+        if (cipherFK.getT() < 20) {
+            cipherFK.setT(cipherFK.getT() + 1);
+        }
+        System.out.println(GSON.toJson(cipherFK));
+        String cipher2 = AESUtils.encryptAES(cipher1, String.valueOf(next));
+
+        long[] keylist = RotationUtils.FDri(rpk, Long.valueOf(cipherFK.getKT()), 2, cipherFK.getN());
+        for (long item : keylist) {
+            System.out.println(item);
+        }
+        String plainText = "";
+        for (int i = 1; i >= 0; i--) {
+            try {
+                plainText = AESUtils.decryptAES(cipher2, String.valueOf(keylist[i]));
+                cipher2 = plainText;
+            } catch (Exception e) {
+            }
+        }
+        System.out.println(plainText);
+    }
 }
