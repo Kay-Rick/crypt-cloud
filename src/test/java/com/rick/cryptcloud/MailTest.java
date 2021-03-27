@@ -1,7 +1,7 @@
 package com.rick.cryptcloud;
 
 import com.rick.cryptcloud.DO.User;
-import com.rick.cryptcloud.common.MailUtils;
+import com.rick.cryptcloud.common.utils.MailUtils;
 import com.rick.cryptcloud.dao.UserMapper;
 
 import org.junit.jupiter.api.Test;

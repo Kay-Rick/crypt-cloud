@@ -1,11 +1,12 @@
 package com.rick.cryptcloud.service.Impl;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rick.cryptcloud.DO.User;
-import com.rick.cryptcloud.DTO.BasicDTO;
-import com.rick.cryptcloud.Enum.DTOEnum;
-import com.rick.cryptcloud.common.DSAUtils;
-import com.rick.cryptcloud.common.ElgamalUtils;
+import com.rick.cryptcloud.common.dto.BasicDTO;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
+import com.rick.cryptcloud.common.utils.DSAUtils;
+import com.rick.cryptcloud.common.utils.ElgamalUtils;
 import com.rick.cryptcloud.dao.UserMapper;
 import com.rick.cryptcloud.service.UserService;
 import org.slf4j.Logger;
@@ -13,26 +14,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final static Gson GSON = new Gson();
+    private final static Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     @Autowired
     private UserMapper userMapper;
-
-    @Override
-    public List<User> queryAll() {
-        log.info("开始查询所有用户");
-        List<User> results = userMapper.selectAll();
-        log.info("查询结果出参：{}", GSON.toJson(results));
-        return results;
-    }
 
     @Override
     public BasicDTO addUser(String username, String email, String password) {
@@ -42,9 +35,9 @@ public class UserServiceImpl implements UserService {
         user.setUsername(username);
         user.setMail(email);
         user.setPassword(password);
-        user.setPrivateKey(ElgamalUtils.getPrivateKey(elgamalKey));
+        user.setPrivateKey(ElgamalUtils.getPrivateKey(Objects.requireNonNull(elgamalKey)));
         user.setPublicKey(ElgamalUtils.getPublicKey(elgamalKey));
-        user.setSignPrivate(DSAUtils.getPrivateKey(DSAKey));
+        user.setSignPrivate(DSAUtils.getPrivateKey(Objects.requireNonNull(DSAKey)));
         user.setSignPublic(DSAUtils.getPublicKey(DSAKey));
         try {
             log.info("插入数据入参：{}", GSON.toJson(user));

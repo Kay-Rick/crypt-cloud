@@ -1,4 +1,4 @@
-package com.rick.cryptcloud.common;
+package com.rick.cryptcloud.common.utils;
 
 import org.apache.commons.math3.primes.Primes;
 import org.apache.commons.math3.util.ArithmeticUtils;
@@ -8,14 +8,14 @@ import java.util.Random;
 
 public class RotationUtils {
 
-    private static final Random random = new Random();
+    private static final Random RANDOM = new Random();
 
     private static final int MAX = 100;
 
     private static final int MIN = 2;
 
     public static long genPrime() {
-        int num = random.nextInt(MAX - MIN + 1) + MIN;
+        int num = RANDOM.nextInt(MAX - MIN + 1) + MIN;
         return Primes.nextPrime(num);
     }
 
@@ -62,8 +62,9 @@ public class RotationUtils {
 
     public static long BDri(long rsk, long cur, long N) {
         BigInteger next;
-        if (cur > N)
+        if (cur > N) {
             System.out.println("Too Big");
+        }
         next = ArithmeticUtils.pow(BigInteger.valueOf(cur), BigInteger.valueOf(rsk)).mod(BigInteger.valueOf(N));
         return next.longValue();
     }

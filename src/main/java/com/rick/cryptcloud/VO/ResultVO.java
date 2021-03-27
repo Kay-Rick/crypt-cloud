@@ -1,6 +1,6 @@
 package com.rick.cryptcloud.VO;
 
-import com.rick.cryptcloud.Enum.ResultEnum;
+import com.rick.cryptcloud.common.Enum.ResultEnum;
 
 public class ResultVO<T> {
     

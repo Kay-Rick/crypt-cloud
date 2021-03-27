@@ -1,6 +1,6 @@
-package com.rick.cryptcloud.DTO;
+package com.rick.cryptcloud.common.dto;
 
-import com.rick.cryptcloud.Enum.DTOEnum;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
 
 public class BasicDTO {
 

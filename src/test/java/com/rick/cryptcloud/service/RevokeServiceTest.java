@@ -1,6 +1,7 @@
 package com.rick.cryptcloud.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rick.cryptcloud.DO.RK;
 import com.rick.cryptcloud.MQ.RKUpdate;
 import com.rick.cryptcloud.MQ.RKUpdateInfo;
@@ -15,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class RevokeServiceTest {
 
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     @Autowired
     private RKMapper rkMapper;

@@ -119,6 +119,7 @@ file:
   uploadLocation: D:\\Server\\Crypt-Cloud\\upload\\
   tupleLocation: D:\\Server\\Crypt-Cloud\\tuple\\
   updateLocation: D:\\Server\\Crypt-Cloud\\tuple\\upload\\
+  updateLocationPrefix: D:\\Server\\Crypt-Cloud\\tuple\\update\\
 
 
 aliyun:

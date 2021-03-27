@@ -1,4 +1,4 @@
-package com.rick.cryptcloud.common;
+package com.rick.cryptcloud.common.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

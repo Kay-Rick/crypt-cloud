@@ -12,12 +12,12 @@ import com.rick.cryptcloud.DO.FK;
 import com.rick.cryptcloud.DO.RK;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.UserRole;
-import com.rick.cryptcloud.DTO.FileContentDTO;
-import com.rick.cryptcloud.Enum.DTOEnum;
-import com.rick.cryptcloud.common.AESUtils;
-import com.rick.cryptcloud.common.AliyunUtils;
-import com.rick.cryptcloud.common.ElgamalUtils;
-import com.rick.cryptcloud.common.RotationUtils;
+import com.rick.cryptcloud.common.dto.FileContentDTO;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
+import com.rick.cryptcloud.common.utils.AESUtils;
+import com.rick.cryptcloud.common.utils.AliyunUtils;
+import com.rick.cryptcloud.common.utils.ElgamalUtils;
+import com.rick.cryptcloud.common.utils.RotationUtils;
 import com.rick.cryptcloud.dao.RoleFileMapper;
 import com.rick.cryptcloud.dao.UserRoleMapper;
 import com.rick.cryptcloud.service.DownloadFileService;
@@ -41,9 +41,6 @@ public class DownloadFileServiceImpl implements DownloadFileService {
     @Value("${file.tupleLocation}")
     private String tupleLocation;
 
-    @Value("${file.downloadLocation}")
-    private String downloadLocation;
-
     @Autowired
     private UserRoleMapper userRoleMapper;
 
@@ -57,19 +54,9 @@ public class DownloadFileServiceImpl implements DownloadFileService {
 
     private static RoleFile roleFile = null;
 
-    private static final String suffix = ".txt";
-
-    private static long rpk;
-
     private static String rkTupleName;
 
     private static String fkTupleName;
-
-    private static String rkContent;
-
-    private static String fkContent;
-
-    private static String fContent;
 
     private static RK rk = null;
 
@@ -77,9 +64,9 @@ public class DownloadFileServiceImpl implements DownloadFileService {
 
     private static F f = null;
 
-    private static CipherFK cipherFK = null;
+    private static String plainText;
 
-    private static boolean flag = false;
+    private static final String SUFFIX = ".txt";
 
     @Override
     public FileContentDTO downloadFile(String username, String filename, String privatekey) {
@@ -88,35 +75,38 @@ public class DownloadFileServiceImpl implements DownloadFileService {
             return new FileContentDTO(DTOEnum.FAILED);
         }
         log.info("开始下载元组文件");
-        downloadTuple();
+        if (!downloadTuple()) {
+            log.info("元组下载失败");
+            return new FileContentDTO(DTOEnum.FAILED);
+        }
         log.info("元组文件下载完成");
+        String fContent, fkContent, rkContent;
         try {
+            log.info("开始读取元组文件");
             rkContent = FileUtils.readFileToString(new File(tupleLocation + rkTupleName));
             fkContent = FileUtils.readFileToString(new File(tupleLocation + fkTupleName));
             fContent = FileUtils.readFileToString(new File(tupleLocation + filename));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("读取元组文件失败：{}", e.getMessage());
+            return new FileContentDTO(DTOEnum.FAILED);
         }
-        log.info("开始反序列化");
-        rk = SerializationUtils.deserialize(Base64.decodeBase64(rkContent));
-        fk = SerializationUtils.deserialize(Base64.decodeBase64(fkContent));
-        f = SerializationUtils.deserialize(Base64.decodeBase64(fContent));
+        try {
+            log.info("开始元组反序列化");
+            rk = SerializationUtils.deserialize(Base64.decodeBase64(rkContent));
+            fk = SerializationUtils.deserialize(Base64.decodeBase64(fkContent));
+            f = SerializationUtils.deserialize(Base64.decodeBase64(fContent));
+        } catch (Exception e) {
+            log.error("元组反序列化失败：{}", e.getMessage());
+            return new FileContentDTO(DTOEnum.FAILED);
+        }
         log.info("反序列化结果：RK：{}，FK：{}，F：{}", GSON.toJson(rk), GSON.toJson(fk), GSON.toJson(f));
         log.info("开始解密元组获取文件数据");
-        String textContent = decrypt(privatekey);
-        if (!flag) {
+        if (!decrypt(privatekey)) {
             log.info("该用户无法解密该文件");
             return new FileContentDTO(DTOEnum.FAILED);
         }
-        log.info("解密得到文件数据为：{}", textContent);
-        try {
-            log.info("将解密内容写入文件，供用户下载");
-            FileUtils.writeStringToFile(new File(downloadLocation + filename), textContent);
-        } catch (IOException e) {
-            log.error("文件：{}写入异常：{}", filename, e.getMessage());
-            return new FileContentDTO(DTOEnum.FAILED);
-        }
-        return new FileContentDTO(textContent);
+        log.info("文件解密成功：{}", plainText);
+        return new FileContentDTO(plainText);
     }
 
     /**
@@ -135,14 +125,17 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         } catch (Exception e) {
             log.error("映射关系查询失败：{}", e.getMessage());
         }
-        for (int i = 0; i < userRoleList.size(); i++) {
-            if (username.equals(userRoleList.get(i).getUsername())) {
-                for (int j = 0; j < roleFileList.size(); j++) {
-                    if (userRoleList.get(i).getRolename().equals(roleFileList.get(j).getRolename())
-                            && filename.equals(roleFileList.get(j).getFilename())) {
-                        userRole = userRoleList.get(i);
-                        roleFile = roleFileList.get(j);
-                        return true;
+
+        if (null != userRoleList && null != roleFileList) {
+            for (int i = 0; i < userRoleList.size(); i++) {
+                if (username.equals(userRoleList.get(i).getUsername())) {
+                    for (int j = 0; j < roleFileList.size(); j++) {
+                        if (userRoleList.get(i).getRolename().equals(roleFileList.get(j).getRolename())
+                                && filename.equals(roleFileList.get(j).getFilename())) {
+                            userRole = userRoleList.get(i);
+                            roleFile = roleFileList.get(j);
+                            return true;
+                        }
                     }
                 }
             }
@@ -153,13 +146,19 @@ public class DownloadFileServiceImpl implements DownloadFileService {
     /**
      * 下载元组
      */
-    private void downloadTuple() {
-        rkTupleName = userRole.getUsername() + "_" + userRole.getRolename() + "_" + String.valueOf(userRole.getVersion()) + suffix;
+    private boolean downloadTuple() {
+        rkTupleName = userRole.getUsername() + "_" + userRole.getRolename() + "_" + String.valueOf(userRole.getVersion()) + SUFFIX;
         String filenameWithNoSuffix = roleFile.getFilename().substring(0, roleFile.getFilename().lastIndexOf("."));
-        fkTupleName = roleFile.getRolename() + "_" + filenameWithNoSuffix + "_" + String.valueOf(roleFile.getVersionRole()) + "_" + String.valueOf(roleFile.getVersionFile()) + suffix;
-        aliyunUtils.downloadToLocal(rkTupleName);
-        aliyunUtils.downloadToLocal(fkTupleName);
-        aliyunUtils.downloadToLocal(roleFile.getFilename());
+        fkTupleName = roleFile.getRolename() + "_" + filenameWithNoSuffix + "_" + String.valueOf(roleFile.getVersionRole()) + "_" + String.valueOf(roleFile.getVersionFile()) + SUFFIX;
+        try {
+            aliyunUtils.downloadToLocal(rkTupleName);
+            aliyunUtils.downloadToLocal(fkTupleName);
+            aliyunUtils.downloadToLocal(roleFile.getFilename());
+        } catch (Exception e) {
+            log.error("元组下载失败：{}", e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -167,39 +166,46 @@ public class DownloadFileServiceImpl implements DownloadFileService {
      * @param privatekey
      * @return
      */
-    public String decrypt(String privatekey) {
+    public boolean decrypt(String privatekey) {
         String rolePrivateKey = null;
+        String cipherKeyList = null;
         try {
             rolePrivateKey = ElgamalUtils.decryptByPrivateKey(rk.getCryptoRolekey(), privatekey);
+            log.info("rolePrivateKey:{}", rolePrivateKey);
+            cipherKeyList = ElgamalUtils.decryptByPrivateKey(fk.getCipherFk(), rolePrivateKey);
         } catch (Exception e) {
-            log.error("解密失败：", e.getMessage());        
+            log.error("解密失败：{}", e.getMessage());
+            return false;
         }
-        
-        log.info("rolePrivateKey:{}", rolePrivateKey);
-        String cipherKeyList = ElgamalUtils.decryptByPrivateKey(fk.getCipherFk(), rolePrivateKey);
-        log.info("开始反序列化密钥列表");
-        cipherFK = SerializationUtils.deserialize(Base64.decodeBase64(cipherKeyList));
+        CipherFK cipherFK = null;
+        try {
+            log.info("开始反序列化密钥列表");
+            cipherFK = SerializationUtils.deserialize(Base64.decodeBase64(cipherKeyList));
+        } catch (Exception e){
+            log.error("解密失败：{}", e.getMessage());
+            return false;
+        }
+
         log.info("反序列化密钥列表结果：{}", GSON.toJson(cipherFK));
         String cipherText = f.getCryptoFile();
         int round = cipherFK.getT();
-        String kt = cipherFK.getKT();
-        rpk = Long.valueOf(cipherFK.getRpk());
+        String kt = cipherFK.getkT();
+        long rpk = Long.parseLong(cipherFK.getRpk());
         long N = cipherFK.getN();
         log.info("开始获取密钥列表");
         long[] keylist = RotationUtils.FDri(rpk, Long.parseLong(kt), round, N);
         log.info("密钥列表为：{}", GSON.toJson(keylist));
-        String plainText = "";
         for (int i = round - 1; i >= 0; i--) {
             try {
                 plainText = AESUtils.decryptAES(cipherText, String.valueOf(keylist[i]));
                 cipherText = plainText;
             } catch (Exception e) {
-                log.error("解密失败：", e.getMessage());
+                log.error("解密失败：{}", e.getMessage());
+                return false;
             }
         }
         log.info("解密成功,内容为：{}", plainText);
-        flag = true;
-        return plainText;
+        return true;
     }
 
 }

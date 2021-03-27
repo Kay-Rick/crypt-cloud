@@ -1,13 +1,8 @@
 package com.rick.cryptcloud.service;
 
-import com.rick.cryptcloud.DO.User;
-import com.rick.cryptcloud.DTO.BasicDTO;
-
-import java.util.List;
+import com.rick.cryptcloud.common.dto.BasicDTO;
 
 public interface UserService {
-
-    List<User> queryAll();
 
     BasicDTO addUser(String username, String email, String password);
 }

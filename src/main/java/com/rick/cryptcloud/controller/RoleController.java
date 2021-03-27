@@ -1,16 +1,14 @@
 package com.rick.cryptcloud.controller;
 
-import java.io.File;
-
-import com.rick.cryptcloud.DTO.BasicDTO;
-import com.rick.cryptcloud.Enum.ResultEnum;
+import java.nio.charset.StandardCharsets;
+import com.rick.cryptcloud.common.dto.BasicDTO;
+import com.rick.cryptcloud.common.Enum.ResultEnum;
 import com.rick.cryptcloud.VO.ResultVO;
 import com.rick.cryptcloud.service.RoleService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,9 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class RoleController {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-
-    @Value("${file.uploadLocation}")
-    private String uploadLocation;
     
     @Autowired
     private RoleService roleService;
@@ -73,14 +68,15 @@ public class RoleController {
     public ResultVO<String> addFile(String rolename, @RequestPart("file") MultipartFile file) {
         if (!file.isEmpty()) {
             try {
-                file.transferTo(new File(uploadLocation + file.getOriginalFilename()));
-                roleService.uploadFile(rolename, file.getOriginalFilename());
+                String fileContent = new String(file.getBytes(), StandardCharsets.UTF_8);
+                String filename = file.getOriginalFilename();
+                roleService.uploadFile(rolename, filename, fileContent);
             } catch (Exception e) {
                 log.error("{}上传失败：{}", file.getOriginalFilename(), e.getMessage());
                 return new ResultVO<>(ResultEnum.FAILED, "文件上传失败");
             }
             log.info("{}上传成功", file.getOriginalFilename());
         }
-        return new ResultVO<String>(ResultEnum.SUCCESS, "文件上传成功");
+        return new ResultVO<>(ResultEnum.SUCCESS, "文件上传成功");
     }
 }

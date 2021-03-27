@@ -2,7 +2,7 @@ package com.rick.cryptcloud.DO;
 
 import java.io.Serializable;
 
-public class CipherFK implements Serializable{
+public class CipherFK implements Serializable {
     private Integer id;
 
     private String k0;
@@ -15,31 +15,7 @@ public class CipherFK implements Serializable{
 
     private Integer t;
 
-    private Long N;
-
-    public String getRsk() {
-        return this.rsk;
-    }
-
-    public void setRsk(String rsk) {
-        this.rsk = rsk;
-    }
-
-    public String getKT() {
-        return this.kT;
-    }
-
-    public void setKT(String kT) {
-        this.kT = kT;
-    }
-
-    public Long getN() {
-        return this.N;
-    }
-
-    public void setN(Long N) {
-        this.N = N;
-    }
+    private Integer n;
 
     public Integer getId() {
         return id;
@@ -73,6 +49,14 @@ public class CipherFK implements Serializable{
         this.rpk = rpk;
     }
 
+    public String getRsk() {
+        return rsk;
+    }
+
+    public void setRsk(String rsk) {
+        this.rsk = rsk;
+    }
+
     public Integer getT() {
         return t;
     }
@@ -81,18 +65,11 @@ public class CipherFK implements Serializable{
         this.t = t;
     }
 
-
-    @Override
-    public String toString() {
-        return "{" +
-            " id='" + getId() + "'" +
-            ", k0='" + getK0() + "'" +
-            ", kT='" + getKT() + "'" +
-            ", rpk='" + getRpk() + "'" +
-            ", rsk='" + getRsk() + "'" +
-            ", t='" + getT() + "'" +
-            ", N='" + getN() + "'" +
-            "}";
+    public Integer getN() {
+        return n;
     }
 
+    public void setN(Integer n) {
+        this.n = n;
+    }
 }

@@ -1,6 +1,7 @@
 package com.rick.cryptcloud.dao;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rick.cryptcloud.DO.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ public class UserMapperTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final static Gson GSON = new Gson();
+    private final static Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     @Autowired
     private UserMapper userMapper;

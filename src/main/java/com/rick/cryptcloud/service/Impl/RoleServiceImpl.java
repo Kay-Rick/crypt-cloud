@@ -1,11 +1,11 @@
 package com.rick.cryptcloud.service.Impl;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rick.cryptcloud.DO.CipherFK;
 import com.rick.cryptcloud.DO.Document;
 import com.rick.cryptcloud.DO.F;
@@ -15,30 +15,21 @@ import com.rick.cryptcloud.DO.Role;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.User;
 import com.rick.cryptcloud.DO.UserRole;
-import com.rick.cryptcloud.DTO.BasicDTO;
-import com.rick.cryptcloud.Enum.DTOEnum;
-import com.rick.cryptcloud.common.AESUtils;
-import com.rick.cryptcloud.common.AliyunUtils;
-import com.rick.cryptcloud.common.DSAUtils;
-import com.rick.cryptcloud.common.ElgamalUtils;
-import com.rick.cryptcloud.common.RotationUtils;
-import com.rick.cryptcloud.dao.DocumentMapper;
-import com.rick.cryptcloud.dao.FKMapper;
-import com.rick.cryptcloud.dao.FMapper;
-import com.rick.cryptcloud.dao.RKMapper;
-import com.rick.cryptcloud.dao.RoleFileMapper;
-import com.rick.cryptcloud.dao.RoleMapper;
-import com.rick.cryptcloud.dao.UserMapper;
-import com.rick.cryptcloud.dao.UserRoleMapper;
+import com.rick.cryptcloud.dao.*;
+import com.rick.cryptcloud.common.dto.BasicDTO;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
+import com.rick.cryptcloud.common.utils.AESUtils;
+import com.rick.cryptcloud.common.utils.AliyunUtils;
+import com.rick.cryptcloud.common.utils.DSAUtils;
+import com.rick.cryptcloud.common.utils.ElgamalUtils;
+import com.rick.cryptcloud.common.utils.RotationUtils;
 import com.rick.cryptcloud.service.RoleService;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,10 +37,7 @@ public class RoleServiceImpl implements RoleService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private static final Gson GSON = new Gson();
-
-    @Value("${file.uploadLocation}")
-    private String uploadLocation;
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
     
     @Autowired
     private AliyunUtils aliyunUtils;
@@ -70,6 +58,9 @@ public class RoleServiceImpl implements RoleService {
     private DocumentMapper documentMapper;
 
     @Autowired
+    private CipherFKMapper cipherFKMapper;
+
+    @Autowired
     private RKMapper rkMapper;
 
     @Autowired
@@ -78,13 +69,13 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private FKMapper fkMapper;
 
-    private static Integer versionRole = 0;
+    private static final Integer VERSION_ROLE = 0;
     
-    private static String operation = "rw";
+    private static final String OPERATION = "rw";
 
-    private static Integer versionFile = 0;
+    private static final Integer VERSION_FILE = 0;
 
-    private static Integer tag = 0;
+    private static final Integer TAG = 0;
 
     private final static String RSK = "RSK";
 
@@ -92,7 +83,7 @@ public class RoleServiceImpl implements RoleService {
 
     private final static String N = "N";
 
-    private static final String suffix = ".txt";
+    private static final String SUFFIX = ".txt";
 
     @Override
     public BasicDTO addRole(String rolename) {
@@ -100,9 +91,9 @@ public class RoleServiceImpl implements RoleService {
         Map<String, Object> DSAKey = DSAUtils.initKey();
         Role role = new Role();
         role.setRolename(rolename);
-        role.setPrivateKey(ElgamalUtils.getPrivateKey(elgamalKey));
+        role.setPrivateKey(ElgamalUtils.getPrivateKey(Objects.requireNonNull(elgamalKey)));
         role.setPublicKey(ElgamalUtils.getPublicKey(elgamalKey));
-        role.setSignPrivate(DSAUtils.getPrivateKey(DSAKey));
+        role.setSignPrivate(DSAUtils.getPrivateKey(Objects.requireNonNull(DSAKey)));
         role.setSignPublic(DSAUtils.getPublicKey(DSAKey));
         log.info("插入角色入参：{}", GSON.toJson(role));
         try {
@@ -121,7 +112,7 @@ public class RoleServiceImpl implements RoleService {
         UserRole userRole = new UserRole();
         userRole.setRolename(rolename);
         userRole.setUsername(username);
-        userRole.setVersion(versionRole);
+        userRole.setVersion(VERSION_ROLE);
         try {
             log.info("添加用户角色映射关系：{}", GSON.toJson(userRole));
             userRoleMapper.insert(userRole);
@@ -133,14 +124,13 @@ public class RoleServiceImpl implements RoleService {
         User user = userMapper.selectByUserName(username);
         Role role = roleMapper.selectByRoleName(rolename);
         RK rk = new RK();
-        rk.setVersionRole(versionRole);
+        rk.setVersionRole(VERSION_ROLE);
         rk.setRolename(rolename);
         rk.setUsername(username);
         rk.setCryptoRolekey(ElgamalUtils.encryptByPublicKey(role.getPrivateKey(), user.getPublicKey()));
         rk.setCryptoRolesign(ElgamalUtils.encryptByPublicKey(role.getSignPrivate(), user.getPublicKey()));
-        String info = rk.getVersionRole() + rk.getUsername() + rk.getRolename() + rk.getCryptoRolekey()
-                + rk.getCryptoRolesign();
-        rk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(info, role.getSignPrivate())));
+        String info = rk.getVersionRole() + rk.getUsername() + rk.getRolename() + rk.getCryptoRolekey() + rk.getCryptoRolesign();
+        rk.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(info, role.getSignPrivate()))));
         try {
             log.info("准备插入RK元组入参：{}", GSON.toJson(rk));
             rkMapper.insert(rk);
@@ -150,8 +140,7 @@ public class RoleServiceImpl implements RoleService {
         }
         log.info("插入RK元组成功");
         // 3.上传RK元组
-        String rkTupleName = rk.getUsername() + "_" + rk.getRolename() + "_" + String.valueOf(rk.getVersionRole())
-                + suffix;
+        String rkTupleName = rk.getUsername() + "_" + rk.getRolename() + "_" + rk.getVersionRole() + SUFFIX;
         String content = Base64.encodeBase64String(SerializationUtils.serialize(rk));
         log.info("上传RK元组：{}，Base64编码后内容：{}", rkTupleName, content);
         aliyunUtils.uploadToServer(rkTupleName, content);
@@ -161,15 +150,24 @@ public class RoleServiceImpl implements RoleService {
 
 
     @Override
-    public BasicDTO uploadFile(String rolename, String filename) {
-        Role role = roleMapper.selectByRoleName(rolename);
+    public BasicDTO uploadFile(String rolename, String filename, String content) {
+        Role role = null;
+        try {
+            log.info("查Role：{}的信息", rolename);
+            role = roleMapper.selectByRoleName(rolename);
+        } catch (Exception e) {
+            log.error("查找Role：{}信息失败：{}", rolename, e.getMessage());
+            return new BasicDTO(DTOEnum.FAILED);
+        }
+        log.info("查找Role信息出参：{}", GSON.toJson(role));
+
         // 1.插入映射关系
         RoleFile roleFile = new RoleFile();
         roleFile.setFilename(filename);
         roleFile.setRolename(rolename);
-        roleFile.setOperation(operation);
-        roleFile.setVersionFile(versionFile);
-        roleFile.setVersionRole(versionRole);
+        roleFile.setOperation(OPERATION);
+        roleFile.setVersionFile(VERSION_FILE);
+        roleFile.setVersionRole(VERSION_ROLE);
         try {
             log.info("添加角色文件映射关系：{}", GSON.toJson(roleFile));
             roleFileMapper.insert(roleFile);
@@ -178,8 +176,8 @@ public class RoleServiceImpl implements RoleService {
             return new BasicDTO(DTOEnum.FAILED);
         }
         // 2.生成file、F元组和FK元组
-        CipherFK cipherFK= new CipherFK();
-        Document document = generateFile(filename, cipherFK);
+        CipherFK cipherFK= generateCipherFK();
+        Document document = generateFile(filename, content, cipherFK);
         try {
             log.info("插入file数据库入参：{}", GSON.toJson(document));
             documentMapper.insert(document);
@@ -187,6 +185,14 @@ public class RoleServiceImpl implements RoleService {
             log.error("插入file数据库失败：{}", e.getMessage());
             return new BasicDTO(DTOEnum.FAILED);
         }
+        try {
+            log.info("插入cipherFK数据库入参：{}", GSON.toJson(cipherFK));
+            cipherFKMapper.insert(cipherFK);
+        } catch (Exception e) {
+            log.error("插入cipherFK数据库失败：{}", e.getMessage());
+            return new BasicDTO(DTOEnum.FAILED);
+        }
+
         F f = generateF(document, cipherFK, role.getSignPrivate());
         FK fk = generateFK(role, document);
         try {
@@ -196,7 +202,6 @@ public class RoleServiceImpl implements RoleService {
             log.error("F元组：{}写入数据库失败：{}", filename, e.getMessage());
             return new BasicDTO(DTOEnum.FAILED);
         }
-        
         log.info("F元组写入数据库成功");
         try {
             log.info("FK元组：{}，准备写入数据库，入参：{}", filename, GSON.toJson(fk));
@@ -209,24 +214,25 @@ public class RoleServiceImpl implements RoleService {
         
         // 3.上传FK元组和F元组
         String filenameWithNoSuffix = fk.getFilename().substring(0, fk.getFilename().lastIndexOf("."));
-        String fkTupleName = fk.getRolename() + "_" + filenameWithNoSuffix + "_" + String.valueOf(fk.getVersionRole())
-                + "_" + String.valueOf(fk.getVersionFile()) + suffix;
+        String fkTupleName = fk.getRolename() + "_" + filenameWithNoSuffix + "_" + fk.getVersionRole() + "_" + fk.getVersionFile() + SUFFIX;
         String fkContent = Base64.encodeBase64String(SerializationUtils.serialize(fk));
-        log.info("上传FK元组：{}，Base64编码后内容：{}", fkTupleName, fkContent);
-        aliyunUtils.uploadToServer(fkTupleName, fkContent);
-        log.info("上传FK元组：{}成功", fkTupleName);
         String fTupleName = f.getFilename();
         String fContent = Base64.encodeBase64String(SerializationUtils.serialize(f));
-        log.info("上传F元组：{}，Base64编码后内容：{}", fTupleName, fContent);
-        aliyunUtils.uploadToServer(fTupleName, fContent);
         log.info("上传F元组：{}成功", fTupleName);
+        try {
+            log.info("上传FK元组：{}和F元组：{}", fkTupleName, fTupleName);
+            aliyunUtils.uploadToServer(fkTupleName, fkContent);
+            aliyunUtils.uploadToServer(fTupleName, fContent);
+        } catch (Exception e) {
+            log.error("上传元组失败：{}", e.getMessage());
+            return new BasicDTO(DTOEnum.FAILED);
+        }
+        log.info("上传FK元组：{}和F元组：{}成功", fkTupleName, fTupleName);
         return new BasicDTO(DTOEnum.SUCCESS);
     }
-    
 
-    private Document generateFile(String filename, CipherFK cipherFK) {
-        Document document = new Document();
-        document.setFilename(filename);
+    private CipherFK generateCipherFK() {
+        CipherFK cipherFK = new CipherFK();
         String aeskey = AESUtils.generateAESKey();
         cipherFK.setK0(aeskey);
         cipherFK.setkT(aeskey);
@@ -234,17 +240,17 @@ public class RoleServiceImpl implements RoleService {
         Map<String, Long> rotationKey = getRotationKey();
         cipherFK.setRpk(String.valueOf(rotationKey.get(RPK)));
         cipherFK.setRsk(String.valueOf(rotationKey.get(RSK)));
-        cipherFK.setN(rotationKey.get(N));
+        cipherFK.setN(rotationKey.get(N).intValue());
+        return cipherFK;
+    }
+
+    private Document generateFile(String filename, String content, CipherFK cipherFK) {
+        Document document = new Document();
+        document.setFilename(filename);
         String serialCipherKey = Base64.encodeBase64String(SerializationUtils.serialize(cipherFK));
         log.info("Base64编码序列化的密钥列表：{}", serialCipherKey);
         document.setCipherKey(serialCipherKey);
-        try {
-            log.info("读取文档：{}", filename);
-            String content = FileUtils.readFileToString(new File(uploadLocation + filename));
-            document.setContent(content);
-        } catch (IOException e) {
-            log.info("文档：{}读取失败：{}", filename, e.getMessage());
-        }
+        document.setContent(content);
         return document;
     }
 
@@ -265,12 +271,12 @@ public class RoleServiceImpl implements RoleService {
         return rotationKey;
     }
 
-    private F generateF(Document document, CipherFK cipherFK, String signkey) {
+    private F generateF(Document document, CipherFK cipherFK, String signKey) {
         F f = new F();
         String cryptofile = AESUtils.encryptAES(document.getContent(), cipherFK.getK0());
         f.setFilename(document.getFilename());
         f.setCryptoFile(cryptofile);
-        f.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(document.getFilename() + cryptofile, signkey)));
+        f.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(document.getFilename() + cryptofile, signKey))));
         return f;
     }
 
@@ -278,14 +284,13 @@ public class RoleServiceImpl implements RoleService {
         FK fk = new FK();
         fk.setRolename(role.getRolename());
         fk.setFilename(document.getFilename());
-        fk.setVersionRole(versionRole);
-        fk.setVersionFile(versionFile);
-        fk.setOperation(operation);
-        fk.setTag(tag);
+        fk.setVersionRole(VERSION_ROLE);
+        fk.setVersionFile(VERSION_FILE);
+        fk.setOperation(OPERATION);
+        fk.setTag(TAG);
         fk.setCipherFk(ElgamalUtils.encryptByPublicKey(document.getCipherKey(), role.getPublicKey()));
-        String info = fk.getVersionRole() + fk.getVersionFile() + fk.getFilename() + fk.getRolename()
-                + fk.getCipherFk();
-        fk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(info, role.getSignPrivate())));
+        String info = fk.getVersionRole() + fk.getVersionFile() + fk.getFilename() + fk.getRolename() + fk.getCipherFk();
+        fk.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(info, role.getSignPrivate()))));
         return fk;
     }
 }

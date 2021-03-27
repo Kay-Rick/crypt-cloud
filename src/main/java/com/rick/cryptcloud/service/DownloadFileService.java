@@ -1,6 +1,6 @@
 package com.rick.cryptcloud.service;
 
-import com.rick.cryptcloud.DTO.FileContentDTO;
+import com.rick.cryptcloud.common.dto.FileContentDTO;
 
 public interface DownloadFileService {
 

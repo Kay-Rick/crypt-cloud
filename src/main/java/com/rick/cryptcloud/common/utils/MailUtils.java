@@ -1,4 +1,4 @@
-package com.rick.cryptcloud.common;
+package com.rick.cryptcloud.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

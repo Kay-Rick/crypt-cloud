@@ -1,4 +1,4 @@
-package com.rick.cryptcloud.common;
+package com.rick.cryptcloud.common.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

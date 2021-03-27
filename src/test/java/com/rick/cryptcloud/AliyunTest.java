@@ -1,6 +1,6 @@
 package com.rick.cryptcloud;
 
-import com.rick.cryptcloud.common.AliyunUtils;
+import com.rick.cryptcloud.common.utils.AliyunUtils;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

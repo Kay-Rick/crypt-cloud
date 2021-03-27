@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,20 +15,17 @@ import com.rick.cryptcloud.DO.Role;
 import com.rick.cryptcloud.DO.RoleFile;
 import com.rick.cryptcloud.DO.User;
 import com.rick.cryptcloud.DO.UserRole;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
 import com.rick.cryptcloud.MQ.FKUpdate;
 import com.rick.cryptcloud.MQ.FKUpdateInfo;
 import com.rick.cryptcloud.MQ.RKUpdate;
 import com.rick.cryptcloud.MQ.RKUpdateInfo;
-import com.rick.cryptcloud.common.AliyunUtils;
-import com.rick.cryptcloud.common.DSAUtils;
-import com.rick.cryptcloud.common.ElgamalUtils;
-import com.rick.cryptcloud.common.RotationUtils;
-import com.rick.cryptcloud.dao.FKMapper;
-import com.rick.cryptcloud.dao.RKMapper;
-import com.rick.cryptcloud.dao.RoleFileMapper;
-import com.rick.cryptcloud.dao.RoleMapper;
-import com.rick.cryptcloud.dao.UserMapper;
-import com.rick.cryptcloud.dao.UserRoleMapper;
+import com.rick.cryptcloud.common.utils.AliyunUtils;
+import com.rick.cryptcloud.common.utils.DSAUtils;
+import com.rick.cryptcloud.common.utils.ElgamalUtils;
+import com.rick.cryptcloud.common.utils.RotationUtils;
+import com.rick.cryptcloud.dao.*;
+import com.rick.cryptcloud.common.dto.BasicDTO;
 import com.rick.cryptcloud.service.RevokeService;
 
 import org.apache.commons.io.FileUtils;
@@ -35,7 +33,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +70,9 @@ public class RevokeServiceImpl implements RevokeService {
     private RKMapper rkMapper;
 
     @Autowired
+    private CipherFKMapper cipherFKMapper;
+
+    @Autowired
     private FKMapper fkMapper;
 
     private static final String EXCHANGE_NAME = "Crypt-Cloud";
@@ -86,15 +86,12 @@ public class RevokeServiceImpl implements RevokeService {
     private static final String SUFFIX = ".txt";
 
     @Override
-    public void revokeUserRole(String username, String rolename) {
-        rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
-            @Override
-            public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-                if (ack) {
-                    log.info("消息发送成功");
-                } else {
-                    log.error("消息发送失败：{}", cause);
-                }
+    public BasicDTO revokeUserRole(String username, String rolename) {
+        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+            if (ack) {
+                log.info("消息发送成功");
+            } else {
+                log.error("消息发送失败：{}", cause);
             }
         });
 
@@ -126,18 +123,20 @@ public class RevokeServiceImpl implements RevokeService {
                     rk.setCryptoRolekey(ElgamalUtils.encryptByPublicKey(ElgamalUtils.getPrivateKey(elgamalKey), user.getPublicKey()));
                     rk.setCryptoRolesign(ElgamalUtils.encryptByPublicKey(DSAUtils.getPrivateKey(DSAKey), user.getPublicKey()));
                     String rkInfo = rk.getVersionRole() + rk.getUsername() + rk.getRolename() + rk.getCryptoRolekey() + rk.getCryptoRolesign();
-                    rk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(rkInfo, DSAUtils.getPrivateKey(DSAKey))));
+                    rk.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(rkInfo, DSAUtils.getPrivateKey(DSAKey)))));
                     try {
                         log.info("开始更新RK信息：{}", GSON.toJson(rk));
                         rkMapper.updateCrypt(rk);
                     } catch (Exception e) {
                         log.error("更新RK：{}失败", GSON.toJson(rk));
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
                     try {
                         log.info("开始更新userRole信息：{}", GSON.toJson(userRole));
                         userRoleMapper.updateVersion(userRole);
                     } catch (Exception e) {
                         log.error("更新userRole：{}失败", GSON.toJson(userRole));
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
 
                     // RK需要更新的信息
@@ -151,12 +150,6 @@ public class RevokeServiceImpl implements RevokeService {
                     rkUpdate.setUsername(rk.getUsername());
                     rkUpdate.setUpdateInfo(rkUpdateInfo);
                     sendUpdate(RK_ROUTING_KEY, GSON.toJson(rkUpdate));
-                    // 3.上传更新RK元组
-                    // String rkTupleName = rk.getUsername() + "_" + rk.getRolename() + "_" + rk.getVersionRole() + SUFFIX;
-                    // String rkContent = Base64.encodeBase64String(SerializationUtils.serialize(rk));
-                    // log.info("上传RK元组：{}，Base64编码后内容：{}", rkTupleName, rkContent);
-                    // aliyunUtils.uploadToServer(rkTupleName, rkContent);
-                    // log.info("上传RK元组：{}成功", rkTupleName);
                 }
             }
             
@@ -165,8 +158,8 @@ public class RevokeServiceImpl implements RevokeService {
                     String filenameWithNoSuffix = roleFile.getFilename().substring(0,
                             roleFile.getFilename().lastIndexOf("."));
                     String fkTupleName = roleFile.getRolename() + "_" + filenameWithNoSuffix + "_"
-                            + String.valueOf(roleFile.getVersionRole()) + "_"
-                            + String.valueOf(roleFile.getVersionFile()) + SUFFIX;
+                            + roleFile.getVersionRole() + "_"
+                            + roleFile.getVersionFile() + SUFFIX;
                     log.info("下载FK元组");
                     aliyunUtils.downloadToUpdate(fkTupleName);
                     log.info("下载FK元组成功");
@@ -179,6 +172,7 @@ public class RevokeServiceImpl implements RevokeService {
                         log.info("FK元组：{}序列化成功", GSON.toJson(fk));
                     } catch (IOException e) {
                         log.error("FK元组反序列化失败:{}", e.getMessage());
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
                     // 更新roleFile映射中role的version
                     roleFile.setVersionRole(roleFile.getVersionRole() + 1);
@@ -187,6 +181,7 @@ public class RevokeServiceImpl implements RevokeService {
                         roleFileMapper.updateRoleVersion(roleFile);
                     } catch (Exception e) {
                         log.error("更新roleFile信息失败：{}", e.getMessage());
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
 
                     Role role = null;
@@ -196,23 +191,29 @@ public class RevokeServiceImpl implements RevokeService {
                         log.info("查询Role：{}成功", GSON.toJson(role));
                     } catch (Exception e) {
                         log.error("查询Role：{}失败：{}", GSON.toJson(role), e.getMessage());
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
-                    String cipherList = ElgamalUtils.decryptByPrivateKey(fk.getCipherFk(), role.getPrivateKey());
+                    String cipherList = ElgamalUtils.decryptByPrivateKey(Objects.requireNonNull(fk).getCipherFk(), Objects.requireNonNull(role).getPrivateKey());
                     CipherFK cipherFK = SerializationUtils.deserialize(Base64.decodeBase64(cipherList));
                     log.info("反序列化得密钥列表：{}", GSON.toJson(cipherFK));
 
                     log.info("开始更新密钥列表");
                     String rsk = cipherFK.getRsk();
-                    String kt = cipherFK.getKT();
-                    Long N = cipherFK.getN();
-                    Long next = RotationUtils.BDri(Long.valueOf(rsk), Long.valueOf(kt), N);
-                    cipherFK.setKT(String.valueOf(next));
+                    String kt = cipherFK.getkT();
+                    Integer N = cipherFK.getN();
+                    Long next = RotationUtils.BDri(Long.parseLong(rsk), Long.parseLong(kt), N);
+                    cipherFK.setkT(String.valueOf(next));
                     // 安全模式：添加加密层，使密钥列表多一个密钥
                     if (cipherFK.getT() < MAX_ROUND) {
                         cipherFK.setT(cipherFK.getT() + 1);
                     }
                     log.info("密钥列表更新完成：{}", GSON.toJson(cipherFK));
-
+                    try {
+                        log.info("开始更新数据库CipherFK密钥列表");
+                        cipherFKMapper.updateByk0(cipherFK);
+                    } catch (Exception e) {
+                        log.error("更新CipherFK数据库失败：{}", e.getMessage());
+                    }
                     fk.setVersionRole(roleFile.getVersionRole());
                     // 用新生成的role密钥重新加密密钥列表
                     fk.setCipherFk(ElgamalUtils.encryptByPublicKey(
@@ -220,13 +221,14 @@ public class RevokeServiceImpl implements RevokeService {
                             ElgamalUtils.getPublicKey(elgamalKey)));
                     String fkInfo = fk.getVersionRole() + fk.getVersionFile() + fk.getFilename() + fk.getRolename()
                             + fk.getCipherFk();
-                    fk.setSignature(DSAUtils.getSignature(DSAUtils.signatureData(fkInfo, role.getSignPrivate())));
+                    fk.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(fkInfo, role.getSignPrivate()))));
 
                     try {
                         log.info("开始更新FK信息：{}", GSON.toJson(fk));
                         fkMapper.updateCrypt(fk);
                     } catch (Exception e) {
                         log.error("更新FK元组失败：{}", e.getMessage());
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
 
                     role.setPrivateKey(ElgamalUtils.getPrivateKey(elgamalKey));
@@ -238,6 +240,7 @@ public class RevokeServiceImpl implements RevokeService {
                         roleMapper.updateByRoleName(role);
                     } catch (Exception e) {
                         log.error("更新Role失败：{}", e.getMessage());
+                        return new BasicDTO(DTOEnum.FAILED);
                     }
                     FKUpdate fkUpdate = new FKUpdate();
                     // FK需要更新的信息
@@ -254,17 +257,12 @@ public class RevokeServiceImpl implements RevokeService {
                     fkUpdate.setTag(fk.getTag());
                     fkUpdate.setUpdateInfo(fkUpdateInfo);
                     sendUpdate(FK_ROUTING_KEY, GSON.toJson(fkUpdate));
-                    // String fkfilenameWithNoSuffix = fk.getFilename().substring(0, fk.getFilename().lastIndexOf("."));
-                    // String fkTupleNameup = fk.getRolename() + "_" + fkfilenameWithNoSuffix + "_" + fk.getVersionRole() + "_"
-                    //         + fk.getVersionFile() + SUFFIX;
-                    // String fkContentup = Base64.encodeBase64String(SerializationUtils.serialize(fk));
-                    // log.info("上传FK元组：{}，Base64编码后内容：{}", fkTupleNameup, fkContentup);
-                    // aliyunUtils.uploadToServer(fkTupleNameup, fkContentup);
-                    // log.info("上传FK元组：{}成功", fkTupleNameup);
                     // TODO：找到要更新的file对应的角色重新加密
                 }
             }
         }
+
+        return new BasicDTO(DTOEnum.SUCCESS);
     }
 
     @Override

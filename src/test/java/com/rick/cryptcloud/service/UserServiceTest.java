@@ -49,11 +49,6 @@ public class UserServiceTest {
         when(userMapper.selectAll()).thenReturn(list);
     }
 
-    @Test
-    public void queryAllTest() {
-        List<User> userList = userService.queryAll();
-        assertEquals("Rick", userList.get(0).getUsername());
-    }
 
     @AfterEach
     public void tearDown() throws Exception {

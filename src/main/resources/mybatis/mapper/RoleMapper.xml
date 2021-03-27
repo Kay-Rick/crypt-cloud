@@ -32,7 +32,7 @@
   <select id="selectByRoleName" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, rolename, public_key, private_key, sign_public, sign_private
     from role
-    where rolename = #{rolename,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, rolename, public_key, private_key, sign_public, sign_private

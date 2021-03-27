@@ -1,10 +1,10 @@
-package com.rick.cryptcloud.Enum;
+package com.rick.cryptcloud.common.Enum;
 
-public enum ResultEnum {
-
+public enum DTOEnum {
+    
     SUCCESS(200, "操作成功"),
 
-    FAILED(404, "响应失败"),
+    FAILED(404, "操作失败"),
 
     ERROR(500, "未知错误");
 
@@ -12,20 +12,20 @@ public enum ResultEnum {
 
     private String msg;
 
-    ResultEnum(int code, String msg) {
+    DTOEnum(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public static ResultEnum getByCode(int code) {
-        for (ResultEnum resultEnum : ResultEnum.values()) {
-            if (code == resultEnum.getCode()) {
-                return resultEnum;
+    public static DTOEnum getByCode(int code) {
+        for (DTOEnum dtoEnum : DTOEnum.values()) {
+            if (code == dtoEnum.getCode()) {
+                return dtoEnum;
             }
         }
         return null;
     }
-    
+
     public int getCode() {
         return this.code;
     }
@@ -34,3 +34,4 @@ public enum ResultEnum {
         return this.msg;
     }
 }
+

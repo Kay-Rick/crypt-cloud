@@ -1,18 +1,21 @@
-package com.rick.cryptcloud.DTO;
+package com.rick.cryptcloud.common.dto;
 
-import com.rick.cryptcloud.Enum.DTOEnum;
+import com.rick.cryptcloud.common.Enum.DTOEnum;
 
-public class UploadDTO {
-    
+public class FileContentDTO {
+   
     public Integer code;
 
     public String message;
+    
+    public String content;
 
-    public UploadDTO() {
+    public FileContentDTO(String content) {
         this(DTOEnum.SUCCESS);
+        this.content = content;
     }
 
-    public UploadDTO(DTOEnum result) {
+    public FileContentDTO(DTOEnum result) {
         this.code = result.getCode();
         this.message = result.getMsg();
     }
@@ -21,16 +24,12 @@ public class UploadDTO {
         return this.code;
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public String getMessage() {
         return this.message;
+    }
+
+    public String getContent() {
+        return this.content;
     }
 
     @Override
@@ -38,8 +37,8 @@ public class UploadDTO {
         return "{" +
             " code='" + getCode() + "'" +
             ", message='" + getMessage() + "'" +
+            ", content='" + getContent() + "'" +
             "}";
     }
-
-
+    
 }

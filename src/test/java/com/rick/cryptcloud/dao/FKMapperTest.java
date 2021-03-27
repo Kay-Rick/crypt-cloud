@@ -2,6 +2,7 @@ package com.rick.cryptcloud.dao;
 
 import com.google.gson.Gson;
 
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public class FKMapperTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final static Gson GSON = new Gson();
+    private final static Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     @Autowired
     private FKMapper fkMapper;

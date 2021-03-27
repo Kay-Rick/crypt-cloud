@@ -117,7 +117,7 @@ file:
   downloadLocation: D:\\Server\\Crypt-Cloud\\download\\
   uploadLocation: D:\\Server\\Crypt-Cloud\\upload\\
   tupleLocation: D:\\Server\\Crypt-Cloud\\tuple\\
-  updateLocationPrefix: D:\\Server\\Crypt-Cloud\\tuple\\upload\\
+  updateLocationPrefix: D:\\Server\\Crypt-Cloud\\tuple\\update\\
 
 aliyun:
   endpoint: https://oss-cn-beijing.aliyuncs.com
