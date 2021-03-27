@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rick.cryptcloud.dao.UserRoleMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.UserRole">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="rolename" jdbcType="VARCHAR" property="rolename" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user_role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.UserRole">
+    insert into user_role (username, rolename, 
+      version)
+    values (#{username,jdbcType=VARCHAR}, #{rolename,jdbcType=VARCHAR}, 
+      #{version,jdbcType=INTEGER})
+  </insert>
+  <update id="updateVersion" parameterType="com.rick.cryptcloud.DO.UserRole">
+    update user_role
+    set version = #{version,jdbcType=INTEGER}
+    where username = #{username,jdbcType=VARCHAR} and rolename = #{rolename,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, username, rolename, version
+    from user_role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, username, rolename, version
+    from user_role
+  </select>
+</mapper>

@@ -1,22 +1,43 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
-<mapper namespace="com.rick.cryptcloud.dao.user.UserMapper">
-    <!--
-		mapper接口的方法名称要和mapper映射文件的statement的id一致。
-		mapper接口的方法参数类型要和mapper映射文件的statement的parameterType的值一致，而且它的参数是一个。
-		mapper接口的方法返回值类型要和mapper映射文件的statement的resultType的值一致。
-	 -->
-    <!--parameterType可以省略-->
-    <insert id="insertUser" parameterType="com.rick.cryptcloud.domain.User">
-        insert into user(name, age) values (#{name}, #{age})
-    </insert>
-
-    <!--注意如果返回的是集合，那应该设置为集合包含的类型，而不是集合本身。-->
-    <select id="queryAll" resultType="com.rick.cryptcloud.domain.User">
-        select * from user
-    </select>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rick.cryptcloud.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="mail" jdbcType="VARCHAR" property="mail" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="public_key" jdbcType="LONGVARCHAR" property="publicKey" />
+    <result column="private_key" jdbcType="LONGVARCHAR" property="privateKey" />
+    <result column="sign_public" jdbcType="LONGVARCHAR" property="signPublic" />
+    <result column="sign_private" jdbcType="LONGVARCHAR" property="signPrivate" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.User">
+    insert into user (username, mail, password, 
+      public_key, private_key, sign_public, 
+      sign_private)
+    values (#{username,jdbcType=VARCHAR}, #{mail,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{publicKey,jdbcType=LONGVARCHAR}, #{privateKey,jdbcType=LONGVARCHAR}, #{signPublic,jdbcType=LONGVARCHAR}, 
+      #{signPrivate,jdbcType=LONGVARCHAR})
+  </insert>
+  <update id="updateByUserName" parameterType="com.rick.cryptcloud.DO.User">
+    update user
+    set public_key = #{publicKey,jdbcType=LONGVARCHAR},
+      private_key = #{privateKey,jdbcType=LONGVARCHAR},
+      sign_public = #{signPublic,jdbcType=LONGVARCHAR},
+      sign_private = #{signPrivate,jdbcType=LONGVARCHAR}
+    where username = #{username,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, username, mail, password, public_key, private_key, sign_public, sign_private
+    from user
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, username, mail, password, public_key, private_key, sign_public, sign_private
+    from user
+  </select>
 </mapper>

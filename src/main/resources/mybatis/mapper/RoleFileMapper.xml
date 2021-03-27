@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rick.cryptcloud.dao.RoleFileMapper">
+  <resultMap id="BaseResultMap" type="com.rick.cryptcloud.DO.RoleFile">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="rolename" jdbcType="VARCHAR" property="rolename" />
+    <result column="filename" jdbcType="VARCHAR" property="filename" />
+    <result column="operation" jdbcType="VARCHAR" property="operation" />
+    <result column="version_file" jdbcType="INTEGER" property="versionFile" />
+    <result column="version_role" jdbcType="INTEGER" property="versionRole" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from role_file
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.rick.cryptcloud.DO.RoleFile">
+    insert into role_file (rolename, filename, 
+      operation, version_file, version_role
+      )
+    values (#{rolename,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR}, 
+      #{operation,jdbcType=VARCHAR}, #{versionFile,jdbcType=INTEGER}, #{versionRole,jdbcType=INTEGER}
+      )
+  </insert>
+  <update id="updateRoleVersion" parameterType="com.rick.cryptcloud.DO.RoleFile">
+    update role_file
+    set rolename = #{rolename,jdbcType=VARCHAR},
+      version_role = #{versionRole,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR} and filename = #{filename,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, rolename, filename, operation, version_file, version_role
+    from role_file
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, rolename, filename, operation, version_file, version_role
+    from role_file
+  </select>
+</mapper>
