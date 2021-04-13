@@ -27,10 +27,10 @@
       version_role = #{versionRole,jdbcType=INTEGER}
     where rolename = #{rolename,jdbcType=VARCHAR} and filename = #{filename,jdbcType=VARCHAR}
   </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  <select id="selectByRolename" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, rolename, filename, operation, version_file, version_role
     from role_file
-    where id = #{id,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, rolename, filename, operation, version_file, version_role

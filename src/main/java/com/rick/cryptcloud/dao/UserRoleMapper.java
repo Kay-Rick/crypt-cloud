@@ -11,7 +11,7 @@ public interface UserRoleMapper {
 
     int insert(UserRole record);
 
-    UserRole selectByPrimaryKey(Integer id);
+    List<UserRole> selectByUsername(String username);
 
     List<UserRole> selectAll();
 

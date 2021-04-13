@@ -1,27 +1,71 @@
 package com.rick.cryptcloud.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.rick.cryptcloud.DO.Role;
+import com.rick.cryptcloud.DO.RoleFile;
+import com.rick.cryptcloud.VO.RoleVO;
 import com.rick.cryptcloud.common.dto.BasicDTO;
 import com.rick.cryptcloud.common.Enum.ResultEnum;
 import com.rick.cryptcloud.VO.ResultVO;
 import com.rick.cryptcloud.service.RoleService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@CrossOrigin
 @RestController
 @RequestMapping("role")
 public class RoleController {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private final static String RW = "读写";
+
+    private final static String R = "读";
     
     @Autowired
     private RoleService roleService;
+
+    @RequestMapping(value = "getAll", method = RequestMethod.GET)
+    public ResultVO<List<RoleVO>> getAllRoles() {
+        List<RoleVO> result = new ArrayList<>();
+        List<Role> roleList = roleService.getAllRoles();
+        if (null == roleList|| roleList.isEmpty()) {
+            return new ResultVO<>(ResultEnum.FAILED, null);
+        }
+        else {
+            for (Role role : roleList) {
+                RoleVO item = new RoleVO();
+                item.setId(role.getId());
+                item.setRolename(role.getRolename());
+                List<RoleFile> roleFileList = roleService.getAllRoleFiles(role.getRolename());
+                if (null != roleFileList && !roleFileList.isEmpty()) {
+                    for (RoleFile roleFile : roleFileList) {
+                        item.setFilename(roleFile.getFilename());
+                        if (StringUtils.equals("rw", roleFile.getOperation())) {
+                            item.setOperation(RW);
+                        }
+                        else {
+                            item.setOperation(R);
+                        }
+                        result.add(item);
+                    }
+                }
+                else {
+                    result.add(item);
+                }
+
+            }
+            return new ResultVO<>(ResultEnum.SUCCESS, result);
+        }
+    }
     
     /**
      * 添加角色
@@ -46,7 +90,7 @@ public class RoleController {
      * @param username
      * @return
      */
-    @RequestMapping("assign")
+    @RequestMapping(value = "assign", method = RequestMethod.POST)
     public ResultVO<String> addUser(String rolename, String username) {
         log.info("开始为用户：{}授角色：{}权限", username, rolename);
         BasicDTO roleDTO = roleService.assignUser(username, rolename);
@@ -66,6 +110,7 @@ public class RoleController {
      */
     @RequestMapping("upload")
     public ResultVO<String> addFile(String rolename, @RequestPart("file") MultipartFile file) {
+        log.info("rolename={},filename={}", rolename, file.getOriginalFilename());
         if (!file.isEmpty()) {
             try {
                 String fileContent = new String(file.getBytes(), StandardCharsets.UTF_8);

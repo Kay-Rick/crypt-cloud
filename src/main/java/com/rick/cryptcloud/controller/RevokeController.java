@@ -11,9 +11,12 @@ import com.rick.cryptcloud.service.RevokeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+@CrossOrigin
 @RestController
 @RequestMapping("revoke")
 public class RevokeController {
@@ -25,7 +28,7 @@ public class RevokeController {
     @Autowired
     private RevokeService revokeService;
 
-    @RequestMapping("role")
+    @RequestMapping(value = "role",method = RequestMethod.POST)
     public ResultVO<String> userRevoke(String username, String rolename) {
         log.info("撤销用户：{}的：{}权限", username, rolename);
         BasicDTO revokeDTO = revokeService.revokeUserRole(username, rolename);

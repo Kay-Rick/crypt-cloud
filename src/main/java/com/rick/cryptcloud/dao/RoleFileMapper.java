@@ -11,7 +11,7 @@ public interface RoleFileMapper {
 
     int insert(RoleFile record);
 
-    RoleFile selectByPrimaryKey(Integer id);
+    List<RoleFile> selectByRolename(String rolename);
 
     List<RoleFile> selectAll();
 

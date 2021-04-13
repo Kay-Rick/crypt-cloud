@@ -29,7 +29,9 @@ public class InterCeptorConfig implements WebMvcConfigurer{
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor())
-                .addPathPatterns("/**")     // 如果是拦截所有，静态资源也会被拦截
-                .excludePathPatterns("/", "/login", "/css/**", "/fonts/**", "images/**", "/js/**", "/aaa/**");  // 放行的请求
+                // 如果是拦截所有，静态资源也会被拦截
+                .addPathPatterns("/**")
+                // 放行的请求
+                .excludePathPatterns("/", "/login", "/css/**", "/fonts/**", "images/**", "/js/**", "/aaa/**");
     }
 }

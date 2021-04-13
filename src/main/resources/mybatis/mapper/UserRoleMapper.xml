@@ -22,10 +22,10 @@
     set version = #{version,jdbcType=INTEGER}
     where username = #{username,jdbcType=VARCHAR} and rolename = #{rolename,jdbcType=VARCHAR}
   </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  <select id="selectByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, username, rolename, version
     from user_role
-    where id = #{id,jdbcType=INTEGER}
+    where username = #{username,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, username, rolename, version

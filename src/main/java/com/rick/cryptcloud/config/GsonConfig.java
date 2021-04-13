@@ -26,12 +26,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class GsonConfig implements WebMvcConfigurer {
 
     @Value("${spring.gson.date-format}")
-    private String GSON_DATE_FORMAT;
+    private String gsonDateFormat;
 
     @Bean
     public Gson gson() {
         GsonBuilder b = new GsonBuilder();
-        b.setDateFormat(GSON_DATE_FORMAT);
+        b.setDateFormat(gsonDateFormat);
         return b.create();
     }
 
@@ -45,7 +45,7 @@ public class GsonConfig implements WebMvcConfigurer {
         converters.add(new SourceHttpMessageConverter<>());
         GsonHttpMessageConverter gsonHttpMessageConverter = new GsonHttpMessageConverter();
         gsonHttpMessageConverter.setGson(gson());
-        gsonHttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON));
+        gsonHttpMessageConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
         converters.add(gsonHttpMessageConverter);
     }
 }

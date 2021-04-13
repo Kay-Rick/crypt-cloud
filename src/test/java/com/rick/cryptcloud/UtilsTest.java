@@ -9,6 +9,7 @@ import com.rick.cryptcloud.common.utils.ElgamalUtils;
 import com.rick.cryptcloud.common.utils.RotationUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 
@@ -232,5 +233,14 @@ public class UtilsTest {
             }
         }
         System.out.println(plainText);
+    }
+
+    @Test
+    public void StringUtilTest() {
+        String str1 = "Rick";
+        String str2 = "Kay";
+        String str3 = "Rick";
+        System.out.println(StringUtils.equals(str1, str3));
+        System.out.println(StringUtils.equals(str1, str2));
     }
 }

@@ -1,8 +1,6 @@
 package com.rick.cryptcloud.service.Impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -292,5 +290,19 @@ public class RoleServiceImpl implements RoleService {
         String info = fk.getVersionRole() + fk.getVersionFile() + fk.getFilename() + fk.getRolename() + fk.getCipherFk();
         fk.setSignature(DSAUtils.getSignature(Objects.requireNonNull(DSAUtils.signatureData(info, role.getSignPrivate()))));
         return fk;
+    }
+
+
+
+    @Override
+    public List<Role> getAllRoles() {
+        log.info("开始查询所有角色");
+        return roleMapper.selectAll();
+    }
+
+    @Override
+    public List<RoleFile> getAllRoleFiles(String rolename) {
+        log.info("开始查询所有角色-文件映射入参：{}", rolename);
+        return roleFileMapper.selectByRolename(rolename);
     }
 }
