@@ -20,17 +20,17 @@
     values (#{k0,jdbcType=VARCHAR}, #{kT,jdbcType=VARCHAR}, #{rpk,jdbcType=VARCHAR},
       #{rsk,jdbcType=VARCHAR}, #{t,jdbcType=INTEGER}, #{n,jdbcType=INTEGER})
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.rick.cryptcloud.DO.CipherFK">
+  <update id="updateByk0" parameterType="com.rick.cryptcloud.DO.CipherFK">
     update cipher_fk
     set
       k_t = #{kT,jdbcType=VARCHAR},
-      t = #{t,jdbcType=INTEGER},
+      t = #{t,jdbcType=INTEGER}
     where k_0 = #{k0,jdbcType=VARCHAR}
   </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  <select id="selectByk0" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, k_0, k_t, rpk, rsk, t, N
     from cipher_fk
-    where id = #{id,jdbcType=INTEGER}
+    where k_0 = #{k0,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, k_0, k_t, rpk, rsk, t, N

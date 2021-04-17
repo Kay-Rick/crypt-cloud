@@ -25,7 +25,17 @@
   <select id="selectByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, username, rolename, version
     from user_role
-    where username = #{username,jdbcType=INTEGER}
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByRolename" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, username, rolename, version
+    from user_role
+    where rolename = #{rolename,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByName" resultMap="BaseResultMap">
+    select id, username, rolename, version
+    from user_role
+    where username = #{username,jdbcType=VARCHAR} and rolename = #{rolename,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, username, rolename, version

@@ -2,6 +2,7 @@ package com.rick.cryptcloud.dao;
 
 import com.rick.cryptcloud.DO.UserRole;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -12,6 +13,10 @@ public interface UserRoleMapper {
     int insert(UserRole record);
 
     List<UserRole> selectByUsername(String username);
+
+    List<UserRole> selectByRolename(String rolename);
+
+    List<UserRole> selectByName(@Param("username")String username, @Param("rolename") String rolename);
 
     List<UserRole> selectAll();
 

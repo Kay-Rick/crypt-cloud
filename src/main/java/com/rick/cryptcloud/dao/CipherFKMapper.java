@@ -7,11 +7,12 @@ import java.util.List;
 
 @Mapper
 public interface CipherFKMapper {
+
     int deleteByPrimaryKey(Integer id);
 
     int insert(CipherFK record);
 
-    CipherFK selectByPrimaryKey(Integer id);
+    CipherFK selectByk0(String k0);
 
     List<CipherFK> selectAll();
 

@@ -7,11 +7,14 @@ import java.util.List;
 
 @Mapper
 public interface RoleFileMapper {
+
     int deleteByPrimaryKey(Integer id);
 
     int insert(RoleFile record);
 
     List<RoleFile> selectByRolename(String rolename);
+
+    List<RoleFile> selectByFilename(String filename);
 
     List<RoleFile> selectAll();
 

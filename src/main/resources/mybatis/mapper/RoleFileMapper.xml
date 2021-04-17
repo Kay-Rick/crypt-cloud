@@ -30,7 +30,12 @@
   <select id="selectByRolename" parameterType="java.lang.String" resultMap="BaseResultMap">
     select id, rolename, filename, operation, version_file, version_role
     from role_file
-    where rolename = #{rolename,jdbcType=INTEGER}
+    where rolename = #{rolename,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByFilename" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, rolename, filename, operation, version_file, version_role
+    from role_file
+    where filename = #{filename,jdbcType=VARCHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, rolename, filename, operation, version_file, version_role
