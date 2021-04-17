@@ -67,7 +67,7 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private FKMapper fkMapper;
 
-    private static final Integer VERSION_ROLE = 0;
+//    private static final Integer VERSION_ROLE = 0;
     
     private static final String OPERATION = "rw";
 
@@ -106,11 +106,33 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public BasicDTO assignUser(String username, String rolename) {
+        // 检查该用户是否存在权限
+        log.info("检查用户是否存在权限入参：username：{}, rolename:{}", username, rolename);
+        List<UserRole> userRoleList = null;
+        try {
+            userRoleList = userRoleMapper.selectByName(username, rolename);
+            log.info("查询用户角色出参：{}", GSON.toJson(userRoleList));
+        } catch (Exception e) {
+            log.error("查询失败：{}", e.getMessage());
+        }
+        if (null != userRoleList && !userRoleList.isEmpty()) {
+            for (UserRole userRole : userRoleList) {
+                log.info("删除被撤销的映射入参id：{}", userRole.getId());
+                try {
+                    int i = userRoleMapper.deleteByPrimaryKey(userRole.getId());
+                    log.info("删除被撤销的映射出参：{}", i);
+                } catch (Exception e) {
+                    log.error("删除被撤销的映射id:{}失败:{}", userRole.getId(), e.getMessage());
+                }
+            }
+        }
         // 1.插入映射关系
+        log.info("获取角色：{}最新的version", rolename);
+        Integer versionRole = getLastedVersionRole(rolename);
         UserRole userRole = new UserRole();
         userRole.setRolename(rolename);
         userRole.setUsername(username);
-        userRole.setVersion(VERSION_ROLE);
+        userRole.setVersion(versionRole);
         try {
             log.info("添加用户角色映射关系：{}", GSON.toJson(userRole));
             userRoleMapper.insert(userRole);
@@ -118,11 +140,12 @@ public class RoleServiceImpl implements RoleService {
             log.error("添加用户角色映射：{}失败：{}", GSON.toJson(userRole), e.getMessage());
             return new BasicDTO(DTOEnum.FAILED);
         }
+
         // 2.插入RK元组
         User user = userMapper.selectByUserName(username);
         Role role = roleMapper.selectByRoleName(rolename);
         RK rk = new RK();
-        rk.setVersionRole(VERSION_ROLE);
+        rk.setVersionRole(versionRole);
         rk.setRolename(rolename);
         rk.setUsername(username);
         rk.setCryptoRolekey(ElgamalUtils.encryptByPublicKey(role.getPrivateKey(), user.getPublicKey()));
@@ -160,12 +183,15 @@ public class RoleServiceImpl implements RoleService {
         log.info("查找Role信息出参：{}", GSON.toJson(role));
 
         // 1.插入映射关系
+        log.info("获取角色：{}最新的版本号", rolename);
+        Integer versionRole = getLastedVersionRole(rolename);
         RoleFile roleFile = new RoleFile();
         roleFile.setFilename(filename);
         roleFile.setRolename(rolename);
         roleFile.setOperation(OPERATION);
+        roleFile.setVersionRole(versionRole);
+        // TODO: 撤销角色权限时的操作
         roleFile.setVersionFile(VERSION_FILE);
-        roleFile.setVersionRole(VERSION_ROLE);
         try {
             log.info("添加角色文件映射关系：{}", GSON.toJson(roleFile));
             roleFileMapper.insert(roleFile);
@@ -282,7 +308,8 @@ public class RoleServiceImpl implements RoleService {
         FK fk = new FK();
         fk.setRolename(role.getRolename());
         fk.setFilename(document.getFilename());
-        fk.setVersionRole(VERSION_ROLE);
+        Integer versionRole = getLastedVersionRole(role.getRolename());
+        fk.setVersionRole(versionRole);
         fk.setVersionFile(VERSION_FILE);
         fk.setOperation(OPERATION);
         fk.setTag(TAG);
@@ -304,5 +331,28 @@ public class RoleServiceImpl implements RoleService {
     public List<RoleFile> getAllRoleFiles(String rolename) {
         log.info("开始查询所有角色-文件映射入参：{}", rolename);
         return roleFileMapper.selectByRolename(rolename);
+    }
+
+    /**
+     * 获取最新的版本号帮助判断用户的权限是否被撤销
+     * @param rolename
+     * @return
+     */
+    private Integer getLastedVersionRole(String rolename) {
+        log.info("开始查询UserRole信息入参：{}", rolename);
+        List<UserRole> userRoleList = null;
+        int result = 0;
+        try {
+            userRoleList = userRoleMapper.selectByRolename(rolename);
+            log.info("查询UserRole信息出参：{}", GSON.toJson(userRoleList));
+        } catch (Exception e) {
+            log.error("查询UserRole：{}信息失败：{}", rolename, e.getMessage());
+        }
+        if (null != userRoleList && !userRoleList.isEmpty()) {
+            for (UserRole userRole : userRoleList) {
+                result = Math.max(result, userRole.getVersion());
+            }
+        }
+        return result;
     }
 }

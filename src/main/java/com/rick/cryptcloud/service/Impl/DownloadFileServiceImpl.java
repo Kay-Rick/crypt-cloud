@@ -134,22 +134,22 @@ public class DownloadFileServiceImpl implements DownloadFileService {
                                 && filename.equals(roleFileList.get(j).getFilename())) {
                             userRole = userRoleList.get(i);
                             roleFile = roleFileList.get(j);
-                            return true;
                         }
                     }
                 }
             }
         }
-        return false;
+        Integer version = getLastedVersionRole(userRole.getRolename());
+        return version.equals(userRole.getVersion());
     }
 
     /**
      * 下载元组
      */
     private boolean downloadTuple() {
-        rkTupleName = userRole.getUsername() + "_" + userRole.getRolename() + "_" + String.valueOf(userRole.getVersion()) + SUFFIX;
+        rkTupleName = userRole.getUsername() + "_" + userRole.getRolename() + "_" + userRole.getVersion() + SUFFIX;
         String filenameWithNoSuffix = roleFile.getFilename().substring(0, roleFile.getFilename().lastIndexOf("."));
-        fkTupleName = roleFile.getRolename() + "_" + filenameWithNoSuffix + "_" + String.valueOf(roleFile.getVersionRole()) + "_" + String.valueOf(roleFile.getVersionFile()) + SUFFIX;
+        fkTupleName = roleFile.getRolename() + "_" + filenameWithNoSuffix + "_" + roleFile.getVersionRole() + "_" + roleFile.getVersionFile() + SUFFIX;
         try {
             aliyunUtils.downloadToLocal(rkTupleName);
             aliyunUtils.downloadToLocal(fkTupleName);
@@ -208,4 +208,27 @@ public class DownloadFileServiceImpl implements DownloadFileService {
         return true;
     }
 
+
+    /**
+     * 获取最新的版本号帮助判断用户的权限是否被撤销
+     * @param rolename
+     * @return
+     */
+    private Integer getLastedVersionRole(String rolename) {
+        log.info("开始查询UserRole信息入参：{}", rolename);
+        List<UserRole> userRoleList = null;
+        int result = 0;
+        try {
+            userRoleList = userRoleMapper.selectByRolename(rolename);
+            log.info("查询UserRole信息出参：{}", GSON.toJson(userRoleList));
+        } catch (Exception e) {
+            log.error("查询UserRole：{}信息失败：{}", rolename, e.getMessage());
+        }
+        if (null != userRoleList && !userRoleList.isEmpty()) {
+            for (UserRole userRole : userRoleList) {
+                result = Math.max(result, userRole.getVersion());
+            }
+        }
+        return result;
+    }
 }

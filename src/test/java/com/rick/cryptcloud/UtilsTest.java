@@ -243,4 +243,10 @@ public class UtilsTest {
         System.out.println(StringUtils.equals(str1, str3));
         System.out.println(StringUtils.equals(str1, str2));
     }
+
+    @Test
+    public void subStrTest() {
+        String filename = "FASDASD.txt";
+        System.out.println(StringUtils.substring(filename, filename.lastIndexOf(".")));
+    }
 }

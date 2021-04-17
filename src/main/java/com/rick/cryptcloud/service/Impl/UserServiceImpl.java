@@ -40,6 +40,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleFileMapper roleFileMapper;
 
+    private static final String REVOKE = "revoke";
+
     @Override
     public BasicDTO addUser(String username, String email, String password) {
         Map<String, Object> elgamalKey = ElgamalUtils.initKey();
@@ -81,6 +83,7 @@ public class UserServiceImpl implements UserService {
         }
         if (null != userRoleList && !userRoleList.isEmpty()) {
             for (UserRole userRole : userRoleList) {
+                Integer version = getLastedVersion(userRole.getRolename());
                 log.info("查询角色映射入参：{}", userRole.getRolename());
                 List<RoleFile> roleFileList = null;
                 try {
@@ -96,7 +99,12 @@ public class UserServiceImpl implements UserService {
                         userDTO.setUsername(user.getUsername());
                         userDTO.setRolename(userRole.getRolename());
                         userDTO.setFilename(roleFile.getFilename());
-                        userDTO.setOperation(roleFile.getOperation());
+                        if (!userRole.getVersion().equals(version)) {
+                            userDTO.setOperation(REVOKE);
+                        }
+                        else {
+                            userDTO.setOperation(roleFile.getOperation());
+                        }
                         result.add(userDTO);
                     }
                 }
@@ -113,6 +121,29 @@ public class UserServiceImpl implements UserService {
             UserDTO userDTO = new UserDTO(DTOEnum.FAILED);
             userDTO.setUsername(user.getUsername());
             result.add(userDTO);
+        }
+        return result;
+    }
+
+    /**
+     * 获取最新的版本号帮助判断用户的权限是否被撤销
+     * @param rolename
+     * @return
+     */
+    private Integer getLastedVersion(String rolename) {
+        log.info("开始查询UserRole信息入参：{}", rolename);
+        List<UserRole> userRoleList = null;
+        int result = 0;
+        try {
+            userRoleList = userRoleMapper.selectByRolename(rolename);
+            log.info("查询UserRole信息出参：{}", GSON.toJson(userRoleList));
+        } catch (Exception e) {
+            log.error("查询UserRole：{}信息失败：{}", rolename, e.getMessage());
+        }
+        if (null != userRoleList && !userRoleList.isEmpty()) {
+            for (UserRole userRole : userRoleList) {
+                result = Math.max(result, userRole.getVersion());
+            }
         }
         return result;
     }

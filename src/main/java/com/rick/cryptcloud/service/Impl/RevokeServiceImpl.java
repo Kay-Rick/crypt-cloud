@@ -87,14 +87,14 @@ public class RevokeServiceImpl implements RevokeService {
 
     @Override
     public BasicDTO revokeUserRole(String username, String rolename) {
-        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
-            if (ack) {
-                log.info("消息发送成功");
-            } else {
-                log.error("消息发送失败：{}", cause);
-            }
-        });
-
+        // TODO: MQ config bug
+//        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+//            if (ack) {
+//                log.info("消息发送成功");
+//            } else {
+//                log.error("消息发送失败：{}", cause);
+//            }
+//        });
         if (null != username && null != rolename) {
             // 重新为role生成密钥
             Map<String, Object> elgamalKey = generateElgamal();

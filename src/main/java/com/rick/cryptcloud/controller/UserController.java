@@ -44,6 +44,7 @@ public class UserController {
 
     private final static String R = "读";
 
+    private final static String REVOKE = "撤销";
 
     @Autowired
     private UserService userService;
@@ -72,6 +73,9 @@ public class UserController {
                         userVO.setMail(user.getMail());
                         if (StringUtils.equals("rw", userDTO.getOperation())) {
                             userVO.setOperation(RW);
+                        }
+                        else if (StringUtils.equals("revoke", userDTO.getOperation())) {
+                            userVO.setOperation(REVOKE);
                         }
                         else {
                             userVO.setOperation(R);
