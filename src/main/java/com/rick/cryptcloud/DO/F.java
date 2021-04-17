@@ -2,7 +2,10 @@ package com.rick.cryptcloud.DO;
 
 import java.io.Serializable;
 
-public class F implements Serializable{
+public class F implements Serializable {
+
+    private static final long serialVersionUID = 8267757691L;
+
     private Integer id;
 
     private String filename;

@@ -3,6 +3,9 @@ package com.rick.cryptcloud.DO;
 import java.io.Serializable;
 
 public class CipherFK implements Serializable {
+
+    private static final long serialVersionUID = 8267757690L;
+
     private Integer id;
 
     private String k0;

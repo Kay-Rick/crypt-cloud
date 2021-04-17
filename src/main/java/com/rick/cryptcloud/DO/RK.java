@@ -2,7 +2,10 @@ package com.rick.cryptcloud.DO;
 
 import java.io.Serializable;
 
-public class RK implements Serializable{
+public class RK implements Serializable {
+
+    private static final long serialVersionUID = 8267757693L;
+
     private Integer id;
 
     private Integer versionRole;
